@@ -1,0 +1,56 @@
+# use glob syntax.
+syntax: glob
+*.ser
+*.class
+*~
+*.bak
+*.off
+*.old
+.DS_Store
+*.swo
+*.swp
+*.swn
+
+# eclipse conf file
+.settings
+.classpath
+.project
+.manager
+
+# building
+target
+null
+tmp*
+dist
+test-output
+
+# sbt
+target
+lib_managed
+src_managed
+project/boot
+project/plugins/project/build.properties
+
+# db
+lift_proto*
+
+# other scm
+.svn
+.CVS
+.hg*
+
+# switch to regexp syntax.
+#  syntax: regexp
+#  ^\.pc/
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea
+
+# Ensime.
+.ensime
+
+# Randomly dropped. Maybe by ensime/ensime-vim?
+1
