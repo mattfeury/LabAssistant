@@ -15,29 +15,33 @@ import net.liftweb._
     import Helpers._
 
 import org.bson.types.ObjectId
-import lib.BCrypt
+import lib._
 
-case class UserSession(userId:String, ip:Option[String],
-                       valid:Boolean, createdAt:Date = now,
-                       _id:ObjectId = ObjectId.get, uniqueId:String = randomString(32))
+case class UserSession(userId:String, ip:Option[String], valid:Boolean,
+                      createdAt:Date = now, _id:ObjectId = ObjectId.get)
     extends MongoDocument[UserSession] {
-  import http.TransientRequestVar
-
   def meta = UserSession
-
-  private object reqUser extends TransientRequestVar[User](User.find("_id" -> userId).get)
+  
   def user = {
-    tryo(reqUser.get) openOr User.find("_id" -> userId).get
+    User.find("_id" -> userId).get
   }
-
-  /*
-  def expire_! = {
-    copy(destroyedAt = Some(now)).save
-  }*/
 }
 
 object UserSession extends MongoDocumentMeta[UserSession] {
+  override def formats = allFormats
 
+  def forUser(userId:String) : List[UserSession] = {
+    for {
+      sessions <- findAll("userId" -> userId)
+    } yield {
+      sessions
+    }
+  }
+
+  def createFailedAttemptFor(userId:String) = {
+
+  }
+  
 }
 
 
@@ -47,13 +51,27 @@ object UserSession extends MongoDocumentMeta[UserSession] {
  *
  * _id might be email ?
  */
-case class User(_id:String, username:String, 
-              email:String, password:String, 
+case class User(_id:String, username:String,
+              email:String, password:String,
+              firstName:String, lastName:String,
               role:Option[String] = None,
               createdAt:Option[Date] = Some(new Date)) extends MongoDocument[User] {
   def meta = User
 
+  def getName = {
+    firstName + " " + lastName
+  }
+
+  def getRole = {
+    role getOrElse "student"
+  }
+
   lazy val admin_? = role.map(_ == User.Role.ADMIN) getOrElse false
+  lazy val instructor_? = admin_? || role.map(_ == User.Role.INSTRUCTOR).getOrElse(false)
+
+  def is_?(userRole:String) = {
+    role.map(_ == userRole) getOrElse false
+  }
 }
 
 /**
@@ -68,17 +86,17 @@ object User extends MongoDocumentMeta[User] {
   
   def forEmail(email:String) : Box[User] = {
     for {
-      user <- User.find("email" -> email)
+      user <- find("email" -> email)
     } yield {
       user
     }
   }
 
-  def withLogin(usernameOrEmail:String) : Box[User] = {
+  def withLogin(idOrEmail:String) : Box[User] = {
     find(
       ("$or" ->
-        List("_id" -> usernameOrEmail.toLowerCase,
-             "email" -> usernameOrEmail.toLowerCase)))
+        List("_id" -> idOrEmail.toLowerCase,
+             "email" -> idOrEmail.toLowerCase)))
   }
 
   def cryptedPassword(clearText:String) = {

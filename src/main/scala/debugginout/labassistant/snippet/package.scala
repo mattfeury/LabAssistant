@@ -31,7 +31,7 @@ package debugginout.labassistant {
       else {
         pendingFunction(Full(fn))
 
-        Call("openstudy.showSignup").cmd
+        Call("showSignup").cmd
       }
     }
 

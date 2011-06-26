@@ -14,7 +14,7 @@ import net.liftweb._
     import SHtml._
 
 import java.util.Date
-import code.lib._
+import debugginout.labassistant.lib._
 import Helpers._
 
 import debugginout.labassistant.model._
@@ -42,33 +42,37 @@ object Users {
 }
 
 class Users {
-  lazy val date: Box[Date] = DependencyFactory.inject[Date] // inject the date
-
-  // replace the contents of the element with id "time" with the date
-  def howdy = "#time *" #> date.map(_.toString)
 
   def createUserForm = {
     var username = ""
     var formEmail = ""
     var password = ""
+    var firstName = ""
+    var lastName = ""
+    var role = S.attr("role")
+      printBox(role)
 
     def validateSignup = {
-      println(username)
-        val user = 
-          User(_id = username.toLowerCase, username = username,
-               email = formEmail.toLowerCase,
-               password = password)
+      val user = 
+        User(_id = username.toLowerCase, 
+            username = username,
+            email = formEmail.toLowerCase,
+            password = User.cryptedPassword(password),
+            firstName = firstName,
+            lastName = lastName,
+            role = role)
 
-        user.save
+      user.save
 
-        Alert("you win")
-
+      Alert("you win")
     }
 
     val processContents =
-      "#username" #> text("", (value) => username = value.trim) &
-      "#email" #> SHtml.email(formEmail, (value:String) => formEmail = value.trim) &
-      "#password" #> SHtml.password("", (value) => password = value.trim) &
+      ".username" #> text("", (value) => username = value.trim) &
+      ".email" #> SHtml.email(formEmail, (value:String) => formEmail = value.trim) &
+      ".password" #> SHtml.password("", (value) => password = value.trim) &
+      ".first-name" #> text("", (value) => firstName = value.trim) &
+      ".last-name" #> text("", (value) => lastName = value.trim) &
       ".submit-button" #> onSubmitButtonLoginless(validateSignup _)
 
     "*" #> { contents:NodeSeq =>

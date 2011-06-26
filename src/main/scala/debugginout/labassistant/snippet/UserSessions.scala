@@ -14,7 +14,7 @@ import net.liftweb._
     import SHtml._
 
 import java.util.Date
-import code.lib._
+import debugginout.labassistant.lib._
 import Helpers._
 
 import debugginout.labassistant.model._
@@ -24,28 +24,76 @@ object session extends SessionVar[Box[UserSession]](Empty)
 object UserSessions { 
 
   def snippetHandlers : SnippetPF = {
+    case List("admin-required") => kickIfNotAdmin _
+    case List("login-required") => kickIfNotLogged _
+    case List("instructor-only") => showIfInstructor _
     case List("admin-only") => showIfAdmin _
   }
 
-  def showIfAdmin(xhtml:NodeSeq) : NodeSeq = {
+  def kickIfNotAdmin(xhtml:NodeSeq) : NodeSeq = {
     if (! session.is.isDefined || ! session.is.open_!.user.admin_?)
       S.redirectTo("/")
 
     xhtml
   }
+  
+  def kickIfNotLogged(xhtml:NodeSeq) : NodeSeq = {
+    if (! session.is.isDefined)
+      S.redirectTo("/")
+
+    xhtml
+  }
+
+  def showIfAdmin(xhtml:NodeSeq) : NodeSeq = {
+    {
+      for {
+        session <- session.is
+        user = session.user if user.admin_?
+      } yield {
+        xhtml
+      }
+    } openOr
+      NodeSeq.Empty
+  }
+
+  def showIfInstructor(xhtml:NodeSeq) : NodeSeq = {
+    {
+      for {
+        session <- session.is
+        user = session.user if user.instructor_?
+      } yield {
+        xhtml
+      }
+    } openOr
+      NodeSeq.Empty
+  }
+  
+
+  def showIfRole(role:String)(xhtml:NodeSeq) : NodeSeq = {
+    {
+      for {
+        session <- session.is
+        user = session.user if user.is_?(role)
+      } yield {
+        xhtml
+      }
+    } openOr
+      NodeSeq.Empty
+    
+  }
+
+
   /**
    * Logs the user in and returns a Box. If the login was successful, a Full
    * box with JsCmds to run client-side is returned; otherwise, a Failure is
    * returned.
    */
   def logUserIn(user:Box[User], postLoginAction:JsCmd) : Box[JsCmd] = {
-    printBox(user)
-    printYellow(S.getRequestHeader("X-Forwarded-For"))
     val userSession =
       for {
         user <- user
         ip = S.getRequestHeader("X-Forwarded-For")
-        session = UserSession(user._id, ip, true)
+        session = UserSession(userId = user._id, ip = ip, valid = true)
       } yield {
         session.save
 
@@ -71,10 +119,6 @@ object UserSessions {
 }
 
 class UserSessions {
-  lazy val date: Box[Date] = DependencyFactory.inject[Date] // inject the date
-
-  // replace the contents of the element with id "time" with the date
-  def howdy = "#time *" #> date.map(_.toString)
 
   def loginForm = {
     var username = ""
@@ -83,15 +127,14 @@ class UserSessions {
     def validateLogin = {
       val defaultError = "Check your username and password."
 
-      val user =
-        (User.forLogin(username, password) ?~ defaultError)
+      val user = (User.forLogin(username, password) ?~ defaultError)
 
       printBox(user)
       user match {
         case Full(user) =>
           val actions =
             UserSessions.logUserIn(Full(user),
-                                   Alert("logged in"))
+                                   RedirectTo("/home"))
 
           actions match {
             case Full(actions) => actions
@@ -101,7 +144,7 @@ class UserSessions {
         case Failure(message, _, _) =>
           Alert(message)
         case Empty =>
-          Alert("Check your username and password.")
+          Alert("Shouldn't really be empty here...")
       }
     }
 
