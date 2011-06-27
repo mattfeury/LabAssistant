@@ -55,18 +55,13 @@ object UserSession extends MongoDocumentMeta[UserSession] {
  * _id might be email ?
  */
 case class User(_id:String, username:String,
-              email:String, password:String,
-              firstName:String, lastName:String,
+              email:String, password:String, name:String,
               role:Option[String] = None,
               status:Option[String] = None,
               createdAt:Option[Date] = Some(new Date)) extends MongoDocument[User] {
   def meta = User
 
-  def getName = {
-    firstName + " " + lastName
-  }
-
-  def getRole = {
+  def getRoleName = {
     role getOrElse "student"
   }
 

@@ -9,15 +9,17 @@
       <div class="l:login-required">
         <h2>Welcome Home</h2>
         <div class="l:admin-only">
-          <h4>Create Instructor</h4>
-          <div class="l:Users.createUserForm?role=instructor">
+          <h4>Create User</h4>
+          <div class="l:Users.createUserForm">
             <label>Username: <input type="text" class="username" /></label>
             <label>Password: <input type="password" class="password" /></label>
 
             <label>Email: <input type="email" class="email" /></label>
-            <label>First Name: <input type="text" class="first-name" /></label>
-            <label>Last Name: <input type="text" class="last-name" /></label>
+            <label>Name: <input type="text" class="name" /></label>
 
+            <select class="role">
+              <option>Student</option>
+            </select>
             <input type="submit" class="submit-button" />        
 
           </div>

@@ -162,8 +162,8 @@ class UserSessions {
       val user = (User.forLogin(username, password) ?~ defaultError)
             .filterMsg("Your account has been temporarily suspended.")(! _.suspended_?)
 
-      printBox(user)
       user match {
+        // good login
         case Full(user) =>
           val actions =
             UserSessions.logUserIn(Full(user),
@@ -171,9 +171,10 @@ class UserSessions {
 
           actions match {
             case Full(actions) => actions
-            case Failure(message, _, _) => ShowLoginError(message)
-            case Empty => throw new Exception("Uh... Unexpected Empty there, son.")
+            case Failure(message, _, _) => Alert(message)
+            case Empty => throw new Exception("something vewy vewy bad has happened.")
           }
+        // bad login. check to suspend.
         case Failure(message, _, _) =>
           val numberOfFails = UserSessions.userFailedLogin(username)
           numberOfFails match {
@@ -188,7 +189,7 @@ class UserSessions {
               Alert(message)
           }
         case Empty =>
-          Alert("Shouldn't really be empty here...")
+          Alert("Shouldn't really be empty here... You found the matrix.")
       }
     }
 
@@ -196,7 +197,6 @@ class UserSessions {
       ".username" #> text("", (value) => username = value) &
       ".password" #> SHtml.password("", (value) =>  password = value) &
       ".submit-button" #> ajaxSubmit("Sign In", validateLogin _)
-
 
     "*" #> { contents:NodeSeq =>
       ajaxForm(

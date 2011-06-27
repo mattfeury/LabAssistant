@@ -26,19 +26,15 @@ import debugginout.labassistant.model._
 class Admin {
   def renderUsers = {
     def renderUser(user:User) = {
-      ".name *" #> user.getName &
+      ".name *" #> user.name &
       ".userId *" #> user._id &
-      ".role *" #> user.getRole
+      ".role *" #> user.getRoleName
     }
 
     val allUsers = User.findAll(List())
 
     //".template" #> ClearNodes andThen
     ".user" #> allUsers.map(renderUser(_))
-  }
-
-  def renderCreateInstructorForm = {
-
   }
 }
 

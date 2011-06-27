@@ -22,7 +22,10 @@ import debugginout.labassistant.model._
 object Users {
 
   def rewriteRules : RewritePF = {
-    case RewriteRequest(ParsePath("admin" :: "create" :: Nil, _, _, _), _, _) =>
+    case RewriteRequest(ParsePath("settings" :: Nil, _, _, _), _, _) =>
+      RewriteResponse("users" :: "edit" :: Nil, true)
+    
+    case RewriteRequest(ParsePath("users" :: "create" :: Nil, _, _, _), _, _) =>
       RewriteResponse("users" :: "create" :: Nil, true)
   }
   
@@ -47,32 +50,40 @@ class Users {
     var username = ""
     var formEmail = ""
     var password = ""
-    var firstName = ""
-    var lastName = ""
-    var role = S.attr("role")
-      printBox(role)
+    var name = ""
+    var role:Option[String] = Empty
+    val preferredRole = S.attr("role")
 
     def validateSignup = {
+
+      var properRole:Option[String] = (preferredRole orElse role) match {
+        case Some("") =>
+          Empty
+        case m @ _ =>
+          m
+      }
+
       val user = 
         User(_id = username.toLowerCase, 
             username = username,
             email = formEmail.toLowerCase,
             password = User.cryptedPassword(password),
-            firstName = firstName,
-            lastName = lastName,
-            role = role)
+            name = name,
+            role = properRole)
 
       user.save
 
       Alert("you win")
     }
 
+    val selectOpts = List(("", "Student"),(User.Role.INSTRUCTOR, "Instructor"), (User.Role.ADMIN, "Admin"))
+
     val processContents =
       ".username" #> text("", (value) => username = value.trim) &
-      ".email" #> SHtml.email(formEmail, (value:String) => formEmail = value.trim) &
+      ".email" #> email(formEmail, (value:String) => formEmail = value.trim) &
       ".password" #> SHtml.password("", (value) => password = value.trim) &
-      ".first-name" #> text("", (value) => firstName = value.trim) &
-      ".last-name" #> text("", (value) => lastName = value.trim) &
+      ".name" #> text("", (value) => name = value.trim) &
+      ".role" #> select(selectOpts, Empty, (value) => role = Some(value)) &
       ".submit-button" #> onSubmitButtonLoginless(validateSignup _)
 
     "*" #> { contents:NodeSeq =>
