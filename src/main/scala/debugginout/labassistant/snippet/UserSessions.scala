@@ -31,12 +31,18 @@ case class ShowLoginError(message:String) extends JsCmd {
 }
 
 object UserSessions { 
+  def dispatch : DispatchPF = {
+    case Req(List("logout"), _, _) =>    
+      session(Empty)
+      S.redirectTo("/")
+  }
 
   def snippetHandlers : SnippetPF = {
     case List("admin-required") => kickIfNotAdmin _
     case List("login-required") => kickIfNotLogged _
     case List("instructor-only") => showIfInstructor _
     case List("admin-only") => showIfAdmin _
+    case List("logged-in") => showIfLoggedIn _
   }
 
   def kickIfNotAdmin(xhtml:NodeSeq) : NodeSeq = {
@@ -51,6 +57,13 @@ object UserSessions {
       S.redirectTo("/")
 
     xhtml
+  }
+
+  def showIfLoggedIn(xhtml:NodeSeq) : NodeSeq = {
+    if (session.is.isDefined)
+      xhtml
+    else
+      NodeSeq.Empty
   }
 
   def showIfAdmin(xhtml:NodeSeq) : NodeSeq = {
@@ -77,7 +90,6 @@ object UserSessions {
       NodeSeq.Empty
   }
   
-
   def showIfRole(role:String)(xhtml:NodeSeq) : NodeSeq = {
     {
       for {
@@ -105,6 +117,7 @@ object UserSessions {
       } yield {
         session.save
 
+        //TODO maybe implement a cookie for auto reload of usersessions
         /*val sessionCookie =
           HTTPCookie("debuggin-lab-ass", session.uniqueId).
             setMaxAge((((session.expiresAt:TimeSpan) - millis) / 1000L).toInt).
@@ -144,10 +157,7 @@ object UserSessions {
         //invalid user
         Failure("User does not exist")
     }
-
-    
   }
-
 }
 
 class UserSessions {

@@ -54,17 +54,15 @@
   </head>
   <body>
     <div class="container">
-      <div class="column span-12 last" style="text-align: right">
+      <nav>
         <h1 class="alt">LabAssist <img alt="" id="ajax-loader" style="display:none; margin-bottom: 0px; margin-left: 5px" src="/images/ajax-loader.gif" /></h1>
+        <div class="l:logged-in logout">
+          <a href="/logout">Logout</a>
+        </div>
         <div class="lift:Msgs?showAll=true"></div>
-        
-      </div>
+      </nav>
 
-      <hr />
-
-      <div class="column span-17 last">
-        <div id="content">The main content will get bound here</div>
-      </div>
+      <div id="content">The main content will get bound here</div>
 
     </div>
   </body>

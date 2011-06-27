@@ -24,6 +24,20 @@ import Helpers._
 import debugginout.labassistant.model._
 
 class Admin {
+
+  def renderCourses = {
+    def renderCourse(course:Course) = {
+      ".name *" #> course.name &
+      ".instructor *" #> course.instructor &
+      ".num-labs *" #> course.labs.length &
+      ".num-students *" #> course.students.length
+    }
+
+    val allCourses = Course.findAll(List())
+
+    ".course" #> allCourses.map(renderCourse(_))
+  }
+
   def renderUsers = {
     def renderUser(user:User) = {
       ".name *" #> user.name &
@@ -33,7 +47,6 @@ class Admin {
 
     val allUsers = User.findAll(List())
 
-    //".template" #> ClearNodes andThen
     ".user" #> allUsers.map(renderUser(_))
   }
 }

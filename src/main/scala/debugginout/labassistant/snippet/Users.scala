@@ -20,7 +20,6 @@ import Helpers._
 import debugginout.labassistant.model._
 
 object Users {
-
   def rewriteRules : RewritePF = {
     case RewriteRequest(ParsePath("settings" :: Nil, _, _, _), _, _) =>
       RewriteResponse("users" :: "edit" :: Nil, true)
@@ -28,20 +27,6 @@ object Users {
     case RewriteRequest(ParsePath("users" :: "create" :: Nil, _, _, _), _, _) =>
       RewriteResponse("users" :: "create" :: Nil, true)
   }
-  
-  /*def dispatch : DispatchPF = {
-    case Req(List("create"), _, _) =>
-      {
-        for {
-          session <- session.is
-          user <- session.user if user.admin_?
-        } yield {
-          true
-        }
-      } getOrElse
-        S.redirectTo("/")
-
-  }*/
 }
 
 class Users {
@@ -55,8 +40,8 @@ class Users {
     val preferredRole = S.attr("role")
 
     def validateSignup = {
-
-      var properRole:Option[String] = (preferredRole orElse role) match {
+      //check to turn "" into an Empty role (for students)
+      val properRole:Option[String] = (preferredRole orElse role) match {
         case Some("") =>
           Empty
         case m @ _ =>

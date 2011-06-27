@@ -50,7 +50,7 @@ class Boot {
     LiftRules.addToPackages("debugginout.labassistant")
     LiftRules.statelessRewrite.append(Users.rewriteRules)
     LiftRules.snippets.append(UserSessions.snippetHandlers)
-    
+    LiftRules.dispatch.append(UserSessions.dispatch)
         
     // Use jQuery 1.4
     LiftRules.jsArtifacts = net.liftweb.http.js.jquery.JQuery14Artifacts

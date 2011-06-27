@@ -22,8 +22,8 @@ import lib._
  */
 case class Course(name:String, instructor:String, 
                   labIds:List[String] = List(), studentIds:List[String] = List(),
-                  createdAt:Date = now, _id:ObjectId = ObjectId.get)
-    extends MongoDocument[Course] {
+                  createdAt:Date = now, _id:ObjectId = ObjectId.get,
+                  uniqueId:String = randomString(32)) extends MongoDocument[Course] {
   def meta = Course
   
   def students = {
@@ -31,7 +31,7 @@ case class Course(name:String, instructor:String,
   }
 
   def labs = {
-    Lab.findAll(("_id" -> ("$in" -> labIds)))
+    Lab.findAll(("uniqueId" -> ("$in" -> labIds)))
   }
   
 }
@@ -45,9 +45,9 @@ object Course extends MongoDocumentMeta[Course] {
  * Teams
  */
 case class Team(name:String, number:Int,
-               studentIds:List[String] = List(),               
-               _id:ObjectId = ObjectId.get)
-    extends MongoDocument[Team] {
+                studentIds:List[String] = List(),               
+                _id:ObjectId = ObjectId.get,
+                uniqueId:String = randomString(32)) extends MongoDocument[Team] {
   def meta = Team
   
   def students = User.findAll("_id" -> ("$in" -> studentIds))
@@ -65,12 +65,12 @@ case class Lab(name:String, startTime:Date, endTime:Date,
                teamSize:Int, courseId:String,
                role:String = Lab.Role.RANDOM,
                teamIds:List[String] = List(),               
-               _id:ObjectId = ObjectId.get)
-    extends MongoDocument[Lab] {
+               _id:ObjectId = ObjectId.get,
+               uniqueId:String = randomString(32)) extends MongoDocument[Lab] {
   def meta = Lab
   
-  def course = Course.find("_id" -> courseId.toLowerCase)
-  def teams = Team.findAll("_id" -> ("$in" -> teamIds))
+  def course = Course.find("uniqueId" -> courseId)
+  def teams = Team.findAll("uniqueId" -> ("$in" -> teamIds))
 }
 
 object Lab extends MongoDocumentMeta[Lab] {
