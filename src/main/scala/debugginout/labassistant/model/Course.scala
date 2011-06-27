@@ -45,12 +45,13 @@ object Course extends MongoDocumentMeta[Course] {
  * Teams
  */
 case class Team(name:String, number:Int,
-                studentIds:List[String] = List(),               
+                studentIds:List[String] = List(),
                 _id:ObjectId = ObjectId.get,
                 uniqueId:String = randomString(32)) extends MongoDocument[Team] {
   def meta = Team
   
   def students = User.findAll("_id" -> ("$in" -> studentIds))
+  def lab = Lab.find("teamIds" -> ("$in" -> uniqueId))
 }
 
 object Team extends MongoDocumentMeta[Team] {

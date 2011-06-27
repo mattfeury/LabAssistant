@@ -22,16 +22,16 @@ import debugginout.labassistant._
 
 object MongoConfig {
   def init: Unit = {
-    val srvr = new ServerAddress(
-       Props.get("mongo.host", "127.0.0.1"),
-       Props.getInt("mongo.port", 27017)
-    )
 
+    //setup db connection
     val mongoHost = MongoHost(Props.get("mongo.host") openOr "127.0.0.1",
                                (for (port <- Props.get("mongo.port")) yield port.toInt) openOr 27017)
     MongoDB.defineDb(DefaultMongoIdentifier, MongoAddress(mongoHost, Props.get("mongo.db") openOr "debuggin"))
 
-    //MongoDB.defineDb(DefaultMongoIdentifier, new Mongo(srvr), Props.get("mongo.db") openOr "debuggin")
+    //setup default admin
+    val defaultAdmin = User("admin", "admin@debugginout.com", User.cryptedPassword("admin"), "Default Administrator", Some(User.Role.ADMIN))
+
+    defaultAdmin.save
   }
 }
   

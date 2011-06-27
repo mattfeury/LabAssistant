@@ -54,7 +54,7 @@ package debugginout.labassistant { package snippet {
             session <- session.is
             user = session.user if user.student_?
           } yield {
-            Course.update("uniqueId" -> course.uniqueId, "$pullAll" -> ("studentIds" -> user._id))
+            Course.update("uniqueId" -> course.uniqueId, "$pull" -> ("studentIds" -> user._id))
             Alert("course left")
           }
         } openOr

@@ -73,7 +73,6 @@ class Users {
 
       val user = 
         User(_id = username.toLowerCase, 
-            username = username,
             email = formEmail.toLowerCase,
             password = User.cryptedPassword(password),
             name = name,

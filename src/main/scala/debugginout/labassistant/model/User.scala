@@ -39,12 +39,7 @@ object UserSession extends MongoDocumentMeta[UserSession] {
     } yield {
       sessions
     }
-  }
-
-  def createFailedAttemptFor(userId:String) = {
-
-  }
-  
+  }  
 }
 
 
@@ -54,8 +49,7 @@ object UserSession extends MongoDocumentMeta[UserSession] {
  *
  * _id might be email ?
  */
-case class User(_id:String, username:String,
-              email:String, password:String, name:String,
+case class User(_id:String, email:String, password:String, name:String,
               role:Option[String] = Some(User.Role.STUDENT),
               status:Option[String] = None,
               createdAt:Option[Date] = Some(new Date)) extends MongoDocument[User] {
