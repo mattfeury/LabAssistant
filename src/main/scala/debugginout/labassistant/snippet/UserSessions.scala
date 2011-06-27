@@ -5,6 +5,11 @@ import scala.xml.{NodeSeq, Text}
 import net.liftweb.util._
 import net.liftweb.common._
 import net.liftweb._
+  import mongodb.Limit
+  import json._
+    import Extraction.decompose
+    import JsonDSL._
+
   import http._
     import js._
       import JsCmds._    
@@ -20,6 +25,10 @@ import Helpers._
 import debugginout.labassistant.model._
 
 object session extends SessionVar[Box[UserSession]](Empty)
+
+case class ShowLoginError(message:String) extends JsCmd {
+  override val toJsCmd = Call("showLoginError", message).toJsCmd
+}
 
 object UserSessions { 
 
@@ -82,8 +91,7 @@ object UserSessions {
     
   }
 
-
-  /**
+ /**
    * Logs the user in and returns a Box. If the login was successful, a Full
    * box with JsCmds to run client-side is returned; otherwise, a Failure is
    * returned.
@@ -109,11 +117,35 @@ object UserSessions {
     session(userSession)
 
     user.map { user =>
-      Alert("session created") &
+      //Alert("session created") &
       postLoginAction
     } or {
       Failure("Session creation failed.")
     }
+  }
+
+  def userFailedLogin(userId:String) : Box[Int] = {
+    //create failed usersession
+    val ip = S.getRequestHeader("X-Forwarded-For")
+    val session = UserSession(userId = userId.toLowerCase, ip = ip, valid = false)
+    session.save
+
+    val user = User.find("_id" -> userId.toLowerCase)
+
+    user match {
+      case Some(user) =>
+        val latestSessions = UserSession.findAll("userId" -> userId.toLowerCase, "createdAt" -> -1, Limit(UserSession.SUSPEND_THRESHOLD))
+        
+        val numberOfConsecutiveFails = latestSessions.prefixLength(! _.valid)          
+        if (numberOfConsecutiveFails == UserSession.SUSPEND_THRESHOLD) //suspend
+          User.update("_id" -> userId.toLowerCase, "$set" -> ("status" -> User.Status.SUSPENDED))
+        Full(numberOfConsecutiveFails)
+      case _ =>
+        //invalid user
+        Failure("User does not exist")
+    }
+
+    
   }
 
 }
@@ -128,6 +160,7 @@ class UserSessions {
       val defaultError = "Check your username and password."
 
       val user = (User.forLogin(username, password) ?~ defaultError)
+            .filterMsg("Your account has been temporarily suspended.")(! _.suspended_?)
 
       printBox(user)
       user match {
@@ -138,11 +171,22 @@ class UserSessions {
 
           actions match {
             case Full(actions) => actions
-            case Failure(message, _, _) => Alert(message)
+            case Failure(message, _, _) => ShowLoginError(message)
             case Empty => throw new Exception("Uh... Unexpected Empty there, son.")
           }
         case Failure(message, _, _) =>
-          Alert(message)
+          val numberOfFails = UserSessions.userFailedLogin(username)
+          numberOfFails match {
+            case Full(numFails) =>
+              val response = {
+                if (numFails == UserSession.SUSPEND_THRESHOLD)
+                  "You have failed to login " + numFails + " consecutive times.\nYour account has been temporarily suspended."
+                else
+                  message + "\nYou have failed to login " + numFails + " consecutive times."              }
+              Alert(response) //ShowLoginError
+            case _ =>
+              Alert(message)
+          }
         case Empty =>
           Alert("Shouldn't really be empty here...")
       }

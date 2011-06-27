@@ -30,6 +30,9 @@ case class UserSession(userId:String, ip:Option[String], valid:Boolean,
 object UserSession extends MongoDocumentMeta[UserSession] {
   override def formats = allFormats
 
+  // number of failed attempts before we suspend
+  val SUSPEND_THRESHOLD = 3
+
   def forUser(userId:String) : List[UserSession] = {
     for {
       sessions <- findAll("userId" -> userId)
@@ -55,6 +58,7 @@ case class User(_id:String, username:String,
               email:String, password:String,
               firstName:String, lastName:String,
               role:Option[String] = None,
+              status:Option[String] = None,
               createdAt:Option[Date] = Some(new Date)) extends MongoDocument[User] {
   def meta = User
 
@@ -68,6 +72,7 @@ case class User(_id:String, username:String,
 
   lazy val admin_? = role.map(_ == User.Role.ADMIN) getOrElse false
   lazy val instructor_? = admin_? || role.map(_ == User.Role.INSTRUCTOR).getOrElse(false)
+  lazy val suspended_? = status.map(_ == User.Status.SUSPENDED) getOrElse false
 
   def is_?(userRole:String) = {
     role.map(_ == userRole) getOrElse false
@@ -78,6 +83,10 @@ case class User(_id:String, username:String,
  * The singleton that has methods for accessing the database
  */
 object User extends MongoDocumentMeta[User] {
+
+  object Status {
+    val SUSPENDED = "suspended"
+  }
 
   object Role {
     val INSTRUCTOR = "instructor"
