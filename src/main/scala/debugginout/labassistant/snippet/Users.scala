@@ -5,6 +5,10 @@ import scala.xml.{NodeSeq, Text}
 import net.liftweb.util._
 import net.liftweb.common._
 import net.liftweb._
+  import json._
+    import Extraction.decompose
+    import JsonDSL._
+
   import http._
     import js._
       import JsCmds._    
@@ -18,6 +22,7 @@ import debugginout.labassistant.lib._
 import Helpers._
 
 import debugginout.labassistant.model._
+import debugginout.labassistant.snippet._
 
 object Users {
   def rewriteRules : RewritePF = {
@@ -27,9 +32,27 @@ object Users {
     case RewriteRequest(ParsePath("users" :: "create" :: Nil, _, _, _), _, _) =>
       RewriteResponse("users" :: "create" :: Nil, true)
   }
+  
 }
 
 class Users {
+  def renderCourses = {
+    {
+      for {
+        session <- session.is
+        user = session.user
+      } yield {
+        ".course" #> user.courses.map(Renderers.renderCourse(_))
+      }
+    } openOr
+      ClearNodes
+  }
+
+  def renderUsers = {
+    val allUsers = User.findAll(List())
+
+    ".user" #> allUsers.map(Renderers.renderUser(_))
+  }  
 
   def createUserForm = {
     var username = ""

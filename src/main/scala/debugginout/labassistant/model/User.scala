@@ -56,7 +56,7 @@ object UserSession extends MongoDocumentMeta[UserSession] {
  */
 case class User(_id:String, username:String,
               email:String, password:String, name:String,
-              role:Option[String] = None,
+              role:Option[String] = Some(User.Role.STUDENT),
               status:Option[String] = None,
               createdAt:Option[Date] = Some(new Date)) extends MongoDocument[User] {
   def meta = User
@@ -65,7 +65,12 @@ case class User(_id:String, username:String,
     role getOrElse "student"
   }
 
+  def courses = {
+    Course.findAll("studentIds" -> _id)
+  }
+
   lazy val admin_? = role.map(_ == User.Role.ADMIN) getOrElse false
+  lazy val student_? = admin_? || role.map(_ == User.Role.STUDENT).getOrElse(true)
   lazy val instructor_? = admin_? || role.map(_ == User.Role.INSTRUCTOR).getOrElse(false)
   lazy val suspended_? = status.map(_ == User.Status.SUSPENDED) getOrElse false
 
@@ -84,6 +89,7 @@ object User extends MongoDocumentMeta[User] {
   }
 
   object Role {
+    val STUDENT = "student"
     val INSTRUCTOR = "instructor"
     val ADMIN = "admin"
   }

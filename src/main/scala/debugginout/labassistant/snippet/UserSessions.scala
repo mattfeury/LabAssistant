@@ -42,6 +42,7 @@ object UserSessions {
     case List("login-required") => kickIfNotLogged _
     case List("instructor-only") => showIfInstructor _
     case List("admin-only") => showIfAdmin _
+    case List("student-only") => showIfStudent _
     case List("logged-in") => showIfLoggedIn _
   }
 
@@ -63,6 +64,18 @@ object UserSessions {
     if (session.is.isDefined)
       xhtml
     else
+      NodeSeq.Empty
+  }
+
+  def showIfStudent(xhtml:NodeSeq) : NodeSeq = {
+    {
+      for {
+        session <- session.is
+        user = session.user if user.student_?
+      } yield {
+        xhtml
+      }
+    } openOr
       NodeSeq.Empty
   }
 
@@ -126,8 +139,10 @@ object UserSessions {
         */
         session
       }
+    printBox(userSession)
 
     session(userSession)
+    printBox(session.is)
 
     user.map { user =>
       //Alert("session created") &
