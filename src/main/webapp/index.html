@@ -7,14 +7,22 @@
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
       <h2>login</h2>
-      <p>
-        <div class="l:UserSessions.loginForm">
-          <input type="text" class="username" />
-          <input type="password" class="password" />
-          <input type="submit" class="submit-button" />        
+      <div class="l:UserSessions.loginForm">
+        <input type="text" class="username" />
+        <input type="password" class="password" />
+        <input type="submit" class="submit-button" />        
+      </div>
 
-        </div>
-      </p>
+      <h2>Signup</h2>
+      <div class="l:Users.createUserForm">
+        <label>Username: <input type="text" class="username" /></label>
+        <label>Password: <input type="password" class="password" /></label>
+
+        <label>Email: <input type="email" class="email" /></label>
+        <label>Name: <input type="text" class="name" /></label>
+
+        <input type="submit" class="submit-button" />
+      </div>
     </div>
   </body>
 </html>

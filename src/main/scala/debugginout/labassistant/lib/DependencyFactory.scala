@@ -1,4 +1,4 @@
-package code
+package debugginout.labassistant
 package lib
 
 import net.liftweb._

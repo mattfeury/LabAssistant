@@ -161,7 +161,7 @@ object UserSessions {
     val user = User.find("_id" -> userId.toLowerCase)
 
     user match {
-      case Some(user) =>
+      case Some(user) if ! user.admin_? =>
         val latestSessions = UserSession.findAll("userId" -> userId.toLowerCase, "createdAt" -> -1, Limit(UserSession.SUSPEND_THRESHOLD))
         
         val numberOfConsecutiveFails = latestSessions.prefixLength(! _.valid)          

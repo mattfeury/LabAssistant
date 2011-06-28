@@ -59,7 +59,7 @@ class Users {
     var formEmail = ""
     var password = ""
     var name = ""
-    var role:Option[String] = Empty
+    var role:Option[String] = Some(User.Role.STUDENT)
     val preferredRole = S.attr("role")
 
     def validateSignup = {
