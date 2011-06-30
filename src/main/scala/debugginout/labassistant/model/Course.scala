@@ -72,6 +72,44 @@ case class Lab(name:String, startTime:Date, endTime:Date,
   
   def course = Course.find("uniqueId" -> courseId)
   def teams = Team.findAll("uniqueId" -> ("$in" -> teamIds))
+
+  def generateRandomTeams = {
+    for {
+      realCourse <- course
+      students = realCourse.studentIds
+    } {
+      val numberOfStudents = students.length
+      //val numberOfTeams = numberOfStudents / teamSize
+      val numberOfExtraStudents = numberOfStudents % teamSize
+      var shuffledStudents = scala.util.Random.shuffle(students)
+      var teamNumber = 0
+      var createdTeamIds:List[String] = List()
+      
+      while (shuffledStudents.length >= teamSize) {
+        teamNumber = teamNumber + 1
+        val teamStudentIds = shuffledStudents.take(teamSize)
+        shuffledStudents = shuffledStudents.drop(teamSize)
+        
+        val team = Team(teamNumber.toString, teamNumber, teamStudentIds)
+        team.save
+        createdTeamIds = createdTeamIds ::: List(team.uniqueId)
+
+      }
+      for {
+        createdTeamId <- createdTeamIds if shuffledStudents.length > 0
+      } {
+        val studentId = shuffledStudents.take(1)
+        shuffledStudents = shuffledStudents.drop(1)
+
+        Team.update("uniqueId" -> createdTeamId, ("$addToSet" -> ("studentIds" -> studentId)))
+      }      
+      
+      
+    }
+  }
+
+
+
 }
 
 object Lab extends MongoDocumentMeta[Lab] {
