@@ -62,7 +62,7 @@ package debugginout.labassistant { package snippet {
 
       }
 
-      ".name *" #> course.name &
+      ".name *" #> <a href={"/courses/"+course.uniqueId} >{course.name}</a> &
       ".instructor *" #> course.instructor &
       ".num-labs *" #> course.labs.length &
       ".num-students *" #> course.students.length &

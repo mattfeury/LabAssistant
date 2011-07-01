@@ -24,19 +24,27 @@ import Helpers._
 import debugginout.labassistant.model._
 import debugginout.labassistant.snippet._
 
+object currentCourse extends RequestVar[Box[Course]](Empty)
+
 object Courses {
   def rewriteRules : RewritePF = {
-    case RewriteRequest(ParsePath("courses" :: Nil, _, _, _), _, _) =>
+    case RewriteRequest(ParsePath("courses" :: courseId :: Nil, _, _, _), _, _) =>
+      currentCourse(Course.find("uniqueId" -> courseId)) 
       RewriteResponse("courses" :: "view" :: Nil, true)
   }
 
 }
 
 class Courses {
-  def renderCourses = {
+  def renderAllCourses = {
     val allCourses = Course.findAll(List())
 
     ".course" #> allCourses.map(Renderers.renderCourse(_))
+  }
+  
+  def renderCourse = {
+
+    ".course" #> currentCourse.map(Renderers.renderCourse(_))
   }
 
   def createCourseForm = {
