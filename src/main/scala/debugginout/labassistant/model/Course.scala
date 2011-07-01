@@ -62,7 +62,7 @@ object Team extends MongoDocumentMeta[Team] {
 /*
  * Labs
  */
-case class Lab(name:String, startTime:Date, endTime:Date, 
+case class Lab(name:String, startTime:String, endTime:String, 
                teamSize:Int, courseId:String,
                role:String = Lab.Role.RANDOM,
                teamIds:List[String] = List(),               

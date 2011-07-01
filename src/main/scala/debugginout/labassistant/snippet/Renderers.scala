@@ -69,5 +69,14 @@ package debugginout.labassistant { package snippet {
       ".join" #> a(joinCourse _, Text("join")) &
       ".leave" #> a(leaveCourse _, Text("leave"))
     }
+	
+	def renderLab(lab:Lab) = {
+		".name *" #> lab.name &
+		".role *" #> lab.role &
+		".teamSize *" #> lab.teamSize &
+		".courseId *" #> lab.courseId &
+		".startTime *" #> lab.startTime &
+		".endTime *" #> lab.endTime
+    }
   }
 } }
