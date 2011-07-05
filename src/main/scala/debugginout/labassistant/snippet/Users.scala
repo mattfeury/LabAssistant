@@ -36,16 +36,19 @@ object Users {
 }
 
 class Users {
+  lazy val user = session.is.get.user
+
   def renderCourses = {
-    {
-      for {
-        session <- session.is
-        user = session.user
-      } yield {
-        ".course" #> user.courses.map(Renderers.renderCourse(_))
-      }
-    } openOr
-      ClearNodes
+    val coursesByRole = user.role match {
+      case Some(User.Role.INSTRUCTOR) =>
+        Course.findAll("instructor" -> user._id)
+      case Some(User.Role.ADMIN) =>
+        user.courses ::: Course.findAll("instructor" -> user._id)
+      case _ =>
+        user.courses   
+    }
+    
+    ".course" #> coursesByRole.distinct.map(Renderers.renderCourse(_, Some(user)))
   }
 
   def renderUsers = {

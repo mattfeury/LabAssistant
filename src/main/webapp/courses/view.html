@@ -9,20 +9,22 @@
     <div id="main" class="lift:surround?with=default;at=content">
       <div class="l:login-required">
 
-        <h2>Current Courses</h2>
-        <ul class="l:Courses.renderCourse">
-          <li class="course">
-            <div class="name">CS 2340</div>
-            <div class="instructor">Bob Waters</div>
-            <div class="num-labs">10</div>
-            <div class="num-students">30</div>
+        <h2>Current Course</h2>
+        <section class="course l:Courses.renderCourse">
+          <div class="name">CS 2340</div>
+          <div class="instructor">Bob Waters</div>
+          <div class="num-labs">10</div>
+          <div class="num-students">30</div>
 
-            <div class="l:student-only controls">
-              <a href="#" class="join">Join</a>
-              <a href="#" class="leave">Leave</a>
-            </div>
-          </li>
-        </ul>
+          <div class="l:student-only controls">
+            <button class="join">Join</button>
+            <button class="leave">Leave</button>
+          </div>
+
+        </section>
+        <section class="l:Courses.renderInstructorPanel">
+          <h2>You are the instructor</h2>
+        </section>
 
       </div> 
     </div>

@@ -36,6 +36,9 @@ object Courses {
 }
 
 class Courses {
+  lazy val course = currentCourse.is.open_!
+  lazy val user = session.is.get.user
+
   def renderAllCourses = {
     val allCourses = Course.findAll(List())
 
@@ -43,8 +46,16 @@ class Courses {
   }
   
   def renderCourse = {
+    printGreen(course)
+    ".course" #> Renderers.renderCourse(course)
+  }
 
-    ".course" #> currentCourse.map(Renderers.renderCourse(_))
+  def renderInstructorPanel = {
+    if (course.userIsInstructor_?(user)) {
+      Labs.createLabForm(course)
+    } else {
+      ClearNodes
+    }
   }
 
   def createCourseForm = {

@@ -33,6 +33,9 @@ case class Course(name:String, instructor:String,
   def labs = {
     Lab.findAll(("uniqueId" -> ("$in" -> labIds)))
   }
+
+  def userIsInstructor_?(user:User) : Boolean = userIsInstructor_?(user._id)
+  def userIsInstructor_?(userId:String) : Boolean = userId == instructor
   
 }
 

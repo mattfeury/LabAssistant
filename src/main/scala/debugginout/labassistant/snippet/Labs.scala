@@ -29,28 +29,20 @@ object Labs {
 		case RewriteRequest(ParsePath("labs" :: Nil, _, _, _), _, _) =>
 			  RewriteResponse("labs" :: "view" :: Nil, true) 
 	}
-}
 
-class Labs{
-	def renderLabs = {
-		val allLabs = Lab.findAll(List())
-
-		".lab" #> allLabs.map(Renderers.renderLab(_))
-	}
-
-	def createLabForm = {
+	def createLabForm(course:Course) = {
 		var name = ""
 		var startTime = ""
 		var endTime = ""
 		var teamSize = ""
-		var courseId = ""
+		var courseId = course.uniqueId
 		var role = Lab.Role.RANDOM
 
 		def createLab = {
 			{
 				for {
 					session <- session.is
-					user = session.user if user.instructor_?
+					user = session.user if user.instructor_? && course.userIsInstructor_?(user)
 				} yield {
 		
 				val lab = 
@@ -74,10 +66,9 @@ class Labs{
 		val processContents =
 		".name" #> text("", (value) => name = value.trim) &
 		".role" #> select(selectOpts, Empty, (value) => role = value) &
-		".teamSize" #> text("", (value) => teamSize = value.trim)
-		".courseId" #> text("", (value) => courseId = value.trim)
-		".startTime" #> text("", (value) => startTime = value.trim)
-		".endTime" #> text("", (value) => endTime = value.trim)
+		".teamSize" #> text("", (value) => teamSize = value.trim) &
+		".startTime" #> text("", (value) => startTime = value.trim) &
+		".endTime" #> text("", (value) => endTime = value.trim) &
 		".submit-button" #> onSubmitButtonLoginless(createLab _)
 
 		"*" #> { contents:NodeSeq =>
@@ -85,7 +76,17 @@ class Labs{
 				processContents(contents)
 			)
 		}
+  }  
+}
 
+class Labs {
+	def renderLabs = {
+		val allLabs = Lab.findAll(List())
 
+		".lab" #> allLabs.map(Renderers.renderLab(_))
 	}
+
+
+
+	
 }
