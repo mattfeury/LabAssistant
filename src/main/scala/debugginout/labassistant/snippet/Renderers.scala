@@ -29,7 +29,7 @@ package debugginout.labassistant { package snippet {
     def renderUser(user:User) = {
       ".name *" #> user.name &
       ".userId *" #> user._id &
-      ".role *" #> user.getRoleName
+      ".role *" #> user.role
     }
     
     def renderCourse(course:Course, renderAsUser:Option[User] = None) = {
@@ -63,13 +63,13 @@ package debugginout.labassistant { package snippet {
       ".leave" #> ajaxButton(Text("leave"), leaveCourse _)
     }
 	
-	def renderLab(lab:Lab) = {
-		".name *" #> lab.name &
-		".role *" #> lab.role &
-		".teamSize *" #> lab.teamSize &
-		".courseId *" #> lab.courseId &
-		".startTime *" #> lab.startTime &
-		".endTime *" #> lab.endTime
+    def renderLab(lab:Lab) = {
+      ".name *" #> lab.name &
+      ".role *" #> lab.role &
+      ".teamSize *" #> lab.teamSize &
+      ".courseId *" #> lab.courseId &
+      ".startTime *" #> lab.startTime &
+      ".endTime *" #> lab.endTime
     }
   }
 } }

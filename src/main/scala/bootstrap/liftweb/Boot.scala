@@ -29,9 +29,12 @@ object MongoConfig {
     MongoDB.defineDb(DefaultMongoIdentifier, MongoAddress(mongoHost, Props.get("mongo.db") openOr "debuggin"))
 
     //setup default admin
-    val defaultAdmin = User("admin", "admin@debugginout.com", User.cryptedPassword("admin"), "Default Administrator", Some(User.Role.ADMIN))
+    val defaultAdmin = User("admin", "admin@debugginout.com", User.cryptedPassword("admin"), "Default Administrator", User.Role.ADMIN)
 
     defaultAdmin.save
+
+    //migration for old users that didn't have a role
+    User.update("role" -> ("$exists" -> false), "$set" -> ("role" -> User.Role.STUDENT), Multi)
   }
 }
   

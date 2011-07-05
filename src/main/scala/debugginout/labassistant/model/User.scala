@@ -50,26 +50,22 @@ object UserSession extends MongoDocumentMeta[UserSession] {
  * _id might be email ?
  */
 case class User(_id:String, email:String, password:String, name:String,
-              role:Option[String] = Some(User.Role.STUDENT),
+              role:String = User.Role.STUDENT,
               status:Option[String] = None,
               createdAt:Option[Date] = Some(new Date)) extends MongoDocument[User] {
   def meta = User
-
-  def getRoleName = {
-    role getOrElse "student"
-  }
 
   def courses = {
     Course.findAll("studentIds" -> _id)
   }
 
-  lazy val admin_? = role.map(_ == User.Role.ADMIN) getOrElse false
-  lazy val student_? = admin_? || role.map(_ == User.Role.STUDENT).getOrElse(true)
-  lazy val instructor_? = admin_? || role.map(_ == User.Role.INSTRUCTOR).getOrElse(false)
-  lazy val suspended_? = status.map(_ == User.Status.SUSPENDED) getOrElse false
+  lazy val admin_? = role == User.Role.ADMIN
+  lazy val student_? = admin_? || role == User.Role.STUDENT
+  lazy val instructor_? = admin_? || role == User.Role.INSTRUCTOR
+  lazy val suspended_? = status == User.Status.SUSPENDED
 
   def is_?(userRole:String) = {
-    role.map(_ == userRole) getOrElse false
+    role == userRole
   }
 }
 

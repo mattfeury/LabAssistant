@@ -40,9 +40,9 @@ class Users {
 
   def renderCourses = {
     val coursesByRole = user.role match {
-      case Some(User.Role.INSTRUCTOR) =>
+      case User.Role.INSTRUCTOR =>
         Course.findAll("instructor" -> user._id)
-      case Some(User.Role.ADMIN) =>
+      case User.Role.ADMIN =>
         user.courses ::: Course.findAll("instructor" -> user._id)
       case _ =>
         user.courses   
@@ -62,17 +62,11 @@ class Users {
     var formEmail = ""
     var password = ""
     var name = ""
-    var role:Option[String] = Some(User.Role.STUDENT)
+    var role = User.Role.STUDENT
     val preferredRole = S.attr("role")
 
     def validateSignup = {
-      //check to turn "" into an Empty role (for students)
-      val properRole:Option[String] = (preferredRole orElse role) match {
-        case Some("") =>
-          Empty
-        case m @ _ =>
-          m
-      }
+      val properRole = preferredRole getOrElse role
 
       val user = 
         User(_id = username.toLowerCase, 
@@ -86,14 +80,14 @@ class Users {
       Alert("you win")
     }
 
-    val selectOpts = List(("", "Student"),(User.Role.INSTRUCTOR, "Instructor"), (User.Role.ADMIN, "Admin"))
+    val selectOpts = List((User.Role.STUDENT, "Student"),(User.Role.INSTRUCTOR, "Instructor"), (User.Role.ADMIN, "Admin"))
 
     val processContents =
       ".username" #> text("", (value) => username = value.trim) &
       ".email" #> email(formEmail, (value:String) => formEmail = value.trim) &
       ".password" #> SHtml.password("", (value) => password = value.trim) &
       ".name" #> text("", (value) => name = value.trim) &
-      ".role" #> select(selectOpts, Empty, (value) => role = Some(value)) &
+      ".role" #> select(selectOpts, Empty, (value) => role = value) &
       ".submit-button" #> onSubmitButtonLoginless(validateSignup _)
 
     "*" #> { contents:NodeSeq =>
