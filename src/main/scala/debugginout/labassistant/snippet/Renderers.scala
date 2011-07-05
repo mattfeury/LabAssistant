@@ -64,7 +64,7 @@ package debugginout.labassistant { package snippet {
     }
 	
     def renderLab(lab:Lab) = {
-      ".name *" #> lab.name &
+      ".name *" #> <a href={"/labs/"+lab.uniqueId} >{lab.name}</a> &
       ".role *" #> lab.role &
       ".teamSize *" #> lab.teamSize &
       ".courseId *" #> lab.courseId &
