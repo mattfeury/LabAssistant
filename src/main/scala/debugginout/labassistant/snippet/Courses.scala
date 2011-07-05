@@ -46,8 +46,9 @@ class Courses {
   }
   
   def renderCourse = {
-    printGreen(course)
-    ".course" #> Renderers.renderCourse(course)
+    printGreen(course.labs)
+    ".course" #> Renderers.renderCourse(course) andThen
+		".lab" #> course.labs.map(Renderers.renderLab(_))
   }
 
   def renderInstructorPanel = {

@@ -16,6 +16,16 @@
           <div class="num-labs">10</div>
           <div class="num-students">30</div>
 
+          <ul class="labs">
+            <li class="lab">
+              <div class="name">Lab 1</div>
+              <div class="startTime">9:00</div>
+              <div class="endTime">10:00</div>
+              <div class="role">Random</div>
+			        <div class="teamSize">4</div>
+            </li>
+          </ul>
+          
           <div class="l:student-only controls">
             <button class="join">Join</button>
             <button class="leave">Leave</button>
@@ -24,6 +34,23 @@
         </section>
         <section class="l:Courses.renderInstructorPanel">
           <h2>You are the instructor</h2>
+          <div class="form">
+            <h4>Create Lab</h4>
+            <label>Lab Name: <input type="text" class="name" /></label>
+            <label>Team Size: <input type="text" class="teamSize" /></label>
+            <label>Role 
+              <select class="role" />
+                <option>Self-Select</option>
+              </select>
+            </label>
+
+            <label>Start Time: <input type="text" class="startTime" /></label>
+            <label>End Time: <input type="text" class="endTime" /></label>
+
+            <input type="submit" class="submit-button" />
+          </div>
+
+
         </section>
 
       </div> 
