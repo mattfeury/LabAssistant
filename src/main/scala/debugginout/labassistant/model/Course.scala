@@ -21,7 +21,7 @@ import lib._
  * Courses
  */
 case class Course(name:String, instructor:String, 
-                  labIds:List[String] = List(), studentIds:List[String] = List(),
+                  studentIds:List[String] = List(),
                   createdAt:Date = now, _id:ObjectId = ObjectId.get,
                   uniqueId:String = randomString(32)) extends MongoDocument[Course] {
   def meta = Course
@@ -31,7 +31,7 @@ case class Course(name:String, instructor:String,
   }
 
   def labs = {
-    Lab.findAll(("uniqueId" -> ("$in" -> labIds)))
+    Lab.findAll("courseId" -> uniqueId)
   }
 
   def userIsInstructor_?(user:User) : Boolean = userIsInstructor_?(user._id)
