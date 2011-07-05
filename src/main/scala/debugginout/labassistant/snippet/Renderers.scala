@@ -71,5 +71,10 @@ package debugginout.labassistant { package snippet {
 		".startTime *" #> lab.startTime &
 		".endTime *" #> lab.endTime
     }
+	
+	def renderTeam(team:Team) = {
+		".name *" #> team.name &
+		".number *" #> (""+team.number)
+	}
   }
 } }

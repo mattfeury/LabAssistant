@@ -24,10 +24,13 @@ import Helpers._
 import debugginout.labassistant.model._
 import debugginout.labassistant.snippet._
 
+object currentLab extends RequestVar[Box[Lab]](Empty)
+
 object Labs {
 	def rewriteRules : RewritePF = {
-		case RewriteRequest(ParsePath("labs" :: Nil, _, _, _), _, _) =>
-			  RewriteResponse("labs" :: "view" :: Nil, true) 
+		case RewriteRequest(ParsePath("labs" :: labId :: Nil, _, _, _), _, _) =>
+			currentLab(Lab.find("uniqueId" -> labId))
+			RewriteResponse("labs" :: "view" :: Nil, true) 
 	}
 
 	def createLabForm(course:Course) = {
@@ -76,17 +79,21 @@ object Labs {
 				processContents(contents)
 			)
 		}
-  }  
+	}  
 }
 
-class Labs {
+class Labs{
+	lazy val lab = currentLab.is.open_!
+	lazy val user = session.is.get.user
+	
 	def renderLabs = {
 		val allLabs = Lab.findAll(List())
-
 		".lab" #> allLabs.map(Renderers.renderLab(_))
 	}
-
-
-
 	
+	def renderLab = {
+	    printGreen(lab.teams)
+		".lab" #> Renderers.renderLab(lab) &
+		".team" #> lab.teams.map(Renderers.renderTeam(_))
+	}
 }
