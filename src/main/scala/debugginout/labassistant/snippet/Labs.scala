@@ -65,7 +65,6 @@ object Labs {
 		
 		val selectOpts = List((Lab.Role.RANDOM, "Random"),(Lab.Role.INDIVIDUAL, "Individual"), (Lab.Role.SELFSELECT, "Self Select"))
 
-
 		val processContents =
 		".name" #> text("", (value) => name = value.trim) &
 		".role" #> select(selectOpts, Empty, (value) => role = value) &
@@ -97,11 +96,15 @@ class Labs {
       var name = ""
 
       def createTeam = {
-        var team = Team(name, 0, lab.uniqueId)
-        team.save
-        team = team.teamWithNumber.get
+        if (lab.studentIsOnTeam_?(user))
+          Alert("student already on team")
+        else {
+          var team = Team(name, 0, lab.uniqueId, List(user._id))
+          team.save
+          team = team.teamWithNumber.get
 
-        Alert("booyah")
+          Alert("booyah")
+        }
       }
 
       val processContents =

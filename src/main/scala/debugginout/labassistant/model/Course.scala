@@ -60,6 +60,13 @@ case class Team(name:String, number:Int,
   def students = User.findAll("_id" -> ("$in" -> studentIds))
   def lab = Lab.find("uniqueId" -> labId)
 
+  def studentIsOnTeam_?(user:User) = {
+    if (user.student_?)
+      studentIds.contains(user._id)
+    else
+      false
+  }
+
   def teamWithNumber = {
     for {
       lab <- lab
@@ -96,6 +103,10 @@ case class Lab(name:String, startTime:String, endTime:String,
   } 
   def userIsStudent_?(user:User) = {
     course.map(_.userIsStudent_?(user)) getOrElse false
+  }
+
+  def studentIsOnTeam_?(user:User) = {
+    teams.exists(_.studentIsOnTeam_?(user))
   }
 
   def generateRandomTeams = {
