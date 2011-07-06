@@ -82,7 +82,7 @@ object Labs {
 	}  
 }
 
-class Labs{
+class Labs {
 	lazy val lab = currentLab.is.open_!
 	lazy val user = session.is.get.user
 	
@@ -92,8 +92,35 @@ class Labs{
 	}
 	
 	def renderLab = {
-	    printGreen(lab.teams)
-		".lab" #> Renderers.renderLab(lab) &
-		".team" #> lab.teams.map(Renderers.renderTeam(_))
+
+    def renderCreateTeam = {
+      var name = ""
+
+      def createTeam = {
+        var team = Team(name, 0, lab.uniqueId)
+        team.save
+        team = team.teamWithNumber.get
+
+        Alert("booyah")
+      }
+
+      val processContents =
+        ".name" #> text("", (value) => name = value.trim) &
+        ".submit-button" #> onSubmitButtonLoginless(createTeam _)
+
+      "*" #> { contents:NodeSeq =>
+        ajaxForm(
+          processContents(contents)
+        )
+      }
+
+    }
+
+		".lab" #> Renderers.renderLab(lab) andThen
+    ".teams" #> (
+  		".team" #> lab.teams.map(Renderers.renderTeam(_))
+    ) &
+    ".student-panel" #> (lab.userIsStudent_?(user) ? PassThru | ClearNodes) andThen
+    ".form" #> renderCreateTeam
 	}
 }

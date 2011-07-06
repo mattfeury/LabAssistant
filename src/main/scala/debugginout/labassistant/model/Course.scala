@@ -36,6 +36,9 @@ case class Course(name:String, instructor:String,
 
   def userIsInstructor_?(user:User) : Boolean = userIsInstructor_?(user._id)
   def userIsInstructor_?(userId:String) : Boolean = userId == instructor
+
+  def userIsStudent_?(user:User) : Boolean = userIsStudent_?(user._id)
+  def userIsStudent_?(userId:String) : Boolean = studentIds.contains(userId)
   
 }
 
@@ -48,13 +51,26 @@ object Course extends MongoDocumentMeta[Course] {
  * Teams
  */
 case class Team(name:String, number:Int,
+                labId:String,
                 studentIds:List[String] = List(),
                 _id:ObjectId = ObjectId.get,
                 uniqueId:String = randomString(32)) extends MongoDocument[Team] {
   def meta = Team
   
   def students = User.findAll("_id" -> ("$in" -> studentIds))
-  def lab = Lab.find("teamIds" -> ("$in" -> uniqueId))
+  def lab = Lab.find("uniqueId" -> labId)
+
+  def teamWithNumber = {
+    for {
+      lab <- lab
+      teams = lab.teams
+    } yield {
+      val id = teams.length
+      meta.update("uniqueId" -> uniqueId, "$set" -> ("number" -> id))
+      this.copy(number = id)
+    }
+  }
+
 }
 
 object Team extends MongoDocumentMeta[Team] {
@@ -68,13 +84,19 @@ object Team extends MongoDocumentMeta[Team] {
 case class Lab(name:String, startTime:String, endTime:String, 
                teamSize:Int, courseId:String,
                role:String = Lab.Role.RANDOM,
-               teamIds:List[String] = List(),               
                _id:ObjectId = ObjectId.get,
                uniqueId:String = randomString(32)) extends MongoDocument[Lab] {
   def meta = Lab
   
   def course = Course.find("uniqueId" -> courseId)
-  def teams = Team.findAll("uniqueId" -> ("$in" -> teamIds))
+  def teams = Team.findAll("labId" -> uniqueId)
+
+  def userIsInstructor_?(user:User) = {
+    course.map(_.userIsInstructor_?(user)) getOrElse false
+  } 
+  def userIsStudent_?(user:User) = {
+    course.map(_.userIsStudent_?(user)) getOrElse false
+  }
 
   def generateRandomTeams = {
     for {
@@ -93,7 +115,7 @@ case class Lab(name:String, startTime:String, endTime:String,
         val teamStudentIds = shuffledStudents.take(teamSize)
         shuffledStudents = shuffledStudents.drop(teamSize)
         
-        val team = Team(teamNumber.toString, teamNumber, teamStudentIds)
+        val team = Team(teamNumber.toString, teamNumber, uniqueId, teamStudentIds)
         team.save
         createdTeamIds = createdTeamIds ::: List(team.uniqueId)
 
