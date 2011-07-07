@@ -122,6 +122,10 @@ case class Lab(name:String, startTime:String, endTime:String,
     teams.exists(_.studentIsOnTeam_?(user))
   }
 
+  def studentIsInCourseFor_?(user:User) = {
+    course.map(_.studentIds.contains(user._id)) getOrElse false
+  }
+
   def deleteExistingTeams = {
     //delete existing teams
     Team.delete("labId" -> uniqueId)

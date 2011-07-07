@@ -77,7 +77,7 @@ package debugginout.labassistant { package snippet {
       lazy val lab = team.lab.get
 
       def joinTeam = {
-        if (! lab.studentIsOnTeam_?(user) && ! team.isFull_?) {
+        if (lab.studentIsInCourseFor_?(user) && ! lab.studentIsOnTeam_?(user) && ! team.isFull_?) {
           Team.update("uniqueId" -> team.uniqueId, "$addToSet" -> ("studentIds" -> user._id))
           Alert("team joined")
         } else {
