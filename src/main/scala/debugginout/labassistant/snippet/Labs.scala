@@ -154,7 +154,7 @@ class Labs {
     ) &
     ".student-panel" #> (lab.userIsStudent_?(user) ? PassThru | ClearNodes) andThen
     ".instructor-panel" #> (lab.userIsInstructor_?(user) ? PassThru | ClearNodes) andThen
-    ".generate" #> ajaxButton(Text("Generate"), generateTeams _) &
+    ".generate" #> ajaxButton(Text("Generate Teams"), generateTeams _) &
     ".form" #> (lab.isSelfSelect_? ? PassThru | ClearNodes) andThen
     ".form" #> renderCreateTeam
 	}
