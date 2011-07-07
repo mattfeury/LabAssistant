@@ -59,6 +59,17 @@ case class Team(name:String, number:Int,
   
   def students = User.findAll("_id" -> ("$in" -> studentIds))
   def lab = Lab.find("uniqueId" -> labId)
+  def size = studentIds.length
+
+  def isFull_? = {
+    {
+      for {
+        lab <- lab
+      } yield {
+        studentIds.length >= lab.teamSize
+      }
+    } getOrElse false
+  }
 
   def studentIsOnTeam_?(user:User) = {
     if (user.student_?)
@@ -97,6 +108,8 @@ case class Lab(name:String, startTime:String, endTime:String,
   
   def course = Course.find("uniqueId" -> courseId)
   def teams = Team.findAll("labId" -> uniqueId)
+
+  def isSelfSelect_? = role == Lab.Role.SELFSELECT
 
   def userIsInstructor_?(user:User) = {
     course.map(_.userIsInstructor_?(user)) getOrElse false

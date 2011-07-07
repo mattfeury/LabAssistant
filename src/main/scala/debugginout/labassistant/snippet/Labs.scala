@@ -124,6 +124,7 @@ class Labs {
   		".team" #> lab.teams.map(Renderers.renderTeam(_))
     ) &
     ".student-panel" #> (lab.userIsStudent_?(user) ? PassThru | ClearNodes) andThen
+    ".form" #> (lab.isSelfSelect_? ? PassThru | ClearNodes) andThen
     ".form" #> renderCreateTeam
 	}
 }

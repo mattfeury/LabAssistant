@@ -72,9 +72,34 @@ package debugginout.labassistant { package snippet {
       ".endTime *" #> lab.endTime
     }
 	
-	def renderTeam(team:Team) = {
-		".name *" #> team.name &
-		".number *" #> (""+team.number)
-	}
+    def renderTeam(team:Team) = {
+      lazy val user = session.is.get.user
+      lazy val lab = team.lab.get
+
+      def joinTeam = {
+        if (! lab.studentIsOnTeam_?(user) && ! team.isFull_?) {
+          Team.update("uniqueId" -> team.uniqueId, "$addToSet" -> ("studentIds" -> user._id))
+          Alert("team joined")
+        } else {
+          Alert("Cannot join.")
+        }
+      }
+
+      def leaveTeam = {
+        if (lab.studentIsOnTeam_?(user)) {
+          Team.update("uniqueId" -> team.uniqueId, "$pull" -> ("studentIds" -> user._id))
+          Alert("team left")
+        } else {
+          Alert("cannot leave")
+        }
+      }
+
+      ".name *" #> team.name &
+      ".size *" #> team.size &
+      ".number *" #> team.number &
+      ".controls" #> (lab.isSelfSelect_? ? PassThru | ClearNodes) andThen
+      ".join" #> ajaxButton(Text("join"), joinTeam _) &
+      ".leave" #> ajaxButton(Text("leave"), leaveTeam _)
+    }
   }
 } }
