@@ -57,7 +57,20 @@ object Labs {
 						role = role)
 				lab.save
 
-				Alert("created")
+        var message = "Generated."
+
+        lab.role match {
+          case Lab.Role.INDIVIDUAL =>
+            lab.generateIndividualTeams
+          case Lab.Role.RANDOM =>
+            val leftovers = lab.generateRandomTeams
+            if (leftovers > 0)
+              message += " Warning: "+leftovers+" students could not be placed on a team. try a different size."
+          case _ =>
+        }
+
+        Alert(message)
+
 				}
 			} openOr
 			Alert("failure")
@@ -119,11 +132,29 @@ class Labs {
 
     }
 
+    def generateTeams = {
+      var message = "Generated."
+
+      lab.role match {
+        case Lab.Role.INDIVIDUAL =>
+          lab.generateIndividualTeams
+        case Lab.Role.RANDOM =>
+          val leftovers = lab.generateRandomTeams
+    			if (leftovers > 0)
+            message += " Warning: "+leftovers+" students could not be placed on a team. try a different size."
+        case _ =>
+      }
+
+      Alert(message)
+    }
+
 		".lab" #> Renderers.renderLab(lab) andThen
     ".teams" #> (
   		".team" #> lab.teams.map(Renderers.renderTeam(_))
     ) &
     ".student-panel" #> (lab.userIsStudent_?(user) ? PassThru | ClearNodes) andThen
+    ".instructor-panel" #> (lab.userIsInstructor_?(user) ? PassThru | ClearNodes) andThen
+    ".generate" #> ajaxButton(Text("Generate"), generateTeams _) &
     ".form" #> (lab.isSelfSelect_? ? PassThru | ClearNodes) andThen
     ".form" #> renderCreateTeam
 	}

@@ -122,39 +122,70 @@ case class Lab(name:String, startTime:String, endTime:String,
     teams.exists(_.studentIsOnTeam_?(user))
   }
 
-  def generateRandomTeams = {
-    for {
-      realCourse <- course
-      students = realCourse.studentIds
-    } {
-      val numberOfStudents = students.length
-      //val numberOfTeams = numberOfStudents / teamSize
-      val numberOfExtraStudents = numberOfStudents % teamSize
-      var shuffledStudents = scala.util.Random.shuffle(students)
-      var teamNumber = 0
-      var createdTeamIds:List[String] = List()
-      
-      while (shuffledStudents.length >= teamSize) {
-        teamNumber = teamNumber + 1
-        val teamStudentIds = shuffledStudents.take(teamSize)
-        shuffledStudents = shuffledStudents.drop(teamSize)
-        
-        val team = Team(teamNumber.toString, teamNumber, uniqueId, teamStudentIds)
-        team.save
-        createdTeamIds = createdTeamIds ::: List(team.uniqueId)
+  def deleteExistingTeams = {
+    //delete existing teams
+    Team.delete("labId" -> uniqueId)
+  }
 
-      }
+  def generateIndividualTeams = {
+    if (role == Lab.Role.INDIVIDUAL)
+    {
+      deleteExistingTeams
+
+      //make each student a team
+      var i = 0
       for {
-        createdTeamId <- createdTeamIds if shuffledStudents.length > 0
+        course <- course
+        student <- course.studentIds
       } {
-        val studentId = shuffledStudents.take(1)
-        shuffledStudents = shuffledStudents.drop(1)
-
-        Team.update("uniqueId" -> createdTeamId, ("$addToSet" -> ("studentIds" -> studentId)))
-      }      
-      
-      
+        val team = Team(name = student,
+                        number = i,
+                        labId = uniqueId,
+                        studentIds = List(student))
+        team.save
+        i = i + 1
+      }
     }
+  }
+
+  def generateRandomTeams : Int = {
+    {
+      for {
+        realCourse <- course
+        students = realCourse.studentIds
+      } yield {
+        deleteExistingTeams
+
+        val numberOfStudents = students.length
+        //val numberOfTeams = numberOfStudents / teamSize
+        val numberOfExtraStudents = numberOfStudents % teamSize
+        var shuffledStudents = scala.util.Random.shuffle(students)
+        var teamNumber = 0
+        var createdTeamIds:List[String] = List()
+        
+        while (shuffledStudents.length >= teamSize) {
+          teamNumber = teamNumber + 1
+          val teamStudentIds = shuffledStudents.take(teamSize)
+          shuffledStudents = shuffledStudents.drop(teamSize)
+          
+          val team = Team(teamNumber.toString, teamNumber, uniqueId, teamStudentIds)
+          team.save
+          createdTeamIds = createdTeamIds ::: List(team.uniqueId)
+
+        }
+
+        for {
+          createdTeamId <- createdTeamIds if shuffledStudents.length > 0
+        } {
+          val studentId = shuffledStudents.head
+          shuffledStudents = shuffledStudents.drop(1)
+
+          Team.update("uniqueId" -> createdTeamId, ("$addToSet" -> ("studentIds" -> studentId)))
+        }
+
+        shuffledStudents.length
+      }
+    } getOrElse 0
   }
 
 

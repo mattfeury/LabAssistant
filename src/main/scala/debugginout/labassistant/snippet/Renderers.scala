@@ -96,6 +96,7 @@ package debugginout.labassistant { package snippet {
 
       ".name *" #> team.name &
       ".size *" #> team.size &
+      ".member *" #> team.students.map(renderUser(_)) &
       ".number *" #> team.number &
       ".controls" #> (lab.isSelfSelect_? ? PassThru | ClearNodes) andThen
       ".join" #> ajaxButton(Text("join"), joinTeam _) &
