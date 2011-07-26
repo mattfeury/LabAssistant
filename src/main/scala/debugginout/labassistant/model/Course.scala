@@ -17,13 +17,18 @@ import net.liftweb._
 import org.bson.types.ObjectId
 import lib._
 
+import net.liftweb.mapper._
+import net.liftweb.util._
+import net.liftweb.common._
+
+
 /*
  * Courses
  */
 case class Course(name:String, instructor:String, 
                   studentIds:List[String] = List(),
                   createdAt:Date = now, _id:ObjectId = ObjectId.get,
-                  uniqueId:String = randomString(32)) extends MongoDocument[Course] {
+                  uniqueId:String = randomString(32)) extends MegaProtoUser[Course] {
   def meta = Course
   
   def students = {
@@ -42,7 +47,7 @@ case class Course(name:String, instructor:String,
   
 }
 
-object Course extends MongoDocumentMeta[Course] {
+object Course extends MetaMegaProtoUser[Course] {
   override def formats = allFormats
 
 }
@@ -54,7 +59,7 @@ case class Team(name:String, number:Int,
                 labId:String,
                 studentIds:List[String] = List(),
                 _id:ObjectId = ObjectId.get,
-                uniqueId:String = randomString(32)) extends MongoDocument[Team] {
+                uniqueId:String = randomString(32)) extends MegaProtoUser[Team] {
   def meta = Team
   
   def students = User.findAll("_id" -> ("$in" -> studentIds))
@@ -91,7 +96,7 @@ case class Team(name:String, number:Int,
 
 }
 
-object Team extends MongoDocumentMeta[Team] {
+object Team extends MetaMegaProtoUser[Team] {
   override def formats = allFormats
 }
 
@@ -103,7 +108,7 @@ case class Lab(name:String, startTime:String, endTime:String,
                teamSize:Int, courseId:String,
                role:String = Lab.Role.RANDOM,
                _id:ObjectId = ObjectId.get,
-               uniqueId:String = randomString(32)) extends MongoDocument[Lab] {
+               uniqueId:String = randomString(32)) extends MegaProtoUser[Lab] {
   def meta = Lab
   
   def course = Course.find("uniqueId" -> courseId)
@@ -196,7 +201,7 @@ case class Lab(name:String, startTime:String, endTime:String,
 
 }
 
-object Lab extends MongoDocumentMeta[Lab] {
+object Lab extends MetaMegaProtoUser[Lab] {
   override def formats = allFormats
 
   object Role {

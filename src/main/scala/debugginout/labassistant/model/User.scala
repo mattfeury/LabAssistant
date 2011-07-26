@@ -17,9 +17,14 @@ import net.liftweb._
 import org.bson.types.ObjectId
 import lib._
 
+import net.liftweb.mapper._
+import net.liftweb.util._
+import net.liftweb.common._
+
+
 case class UserSession(userId:String, ip:Option[String], valid:Boolean,
                       createdAt:Date = now, _id:ObjectId = ObjectId.get)
-    extends MongoDocument[UserSession] {
+    extends MegaProtoUser[UserSession] {
   def meta = UserSession
   
   def user = {
@@ -27,7 +32,7 @@ case class UserSession(userId:String, ip:Option[String], valid:Boolean,
   }
 }
 
-object UserSession extends MongoDocumentMeta[UserSession] {
+object UserSession extends MegaProtoUserMeta[UserSession] {
   override def formats = allFormats
 
   // number of failed attempts before we suspend
@@ -52,7 +57,7 @@ object UserSession extends MongoDocumentMeta[UserSession] {
 case class User(_id:String, email:String, password:String, name:String,
               role:String = User.Role.STUDENT,
               status:Option[String] = None,
-              createdAt:Option[Date] = Some(new Date)) extends MongoDocument[User] {
+              createdAt:Option[Date] = Some(new Date)) extends MegaProtoUser[User] {
   def meta = User
 
   def courses = {
@@ -72,7 +77,7 @@ case class User(_id:String, email:String, password:String, name:String,
 /**
  * The singleton that has methods for accessing the database
  */
-object User extends MongoDocumentMeta[User] {
+object User extends MegaProtoUserMeta[User] {
 
   object Status {
     val SUSPENDED = "suspended"
