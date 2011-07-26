@@ -1,20 +1,24 @@
-<section class="course">
-  <div>Course Name: <span class="name">CS 2340</span></div>
-  <div>Instructor: <span class="instructor">Bob Waters</span></div>
-  <div>Number of Labs: <span class="num-labs">10</span></div>
-  <div>Number of Students: <span class="num-students">30</span></div>
+<li class="course">
+  <section class="info">
+    <div class="name">CS 2340</div>
+    <div>Instructor: <span class="instructor">Bob Waters</span></div>
+    <div>Number of Labs: <span class="num-labs">10</span></div>
+    <div>Number of Students: <span class="num-students">30</span></div>
 
-  <div class="l:student-only controls">
-    <button class="join">Join</button>
-    <button class="leave">Leave</button>
+    <div class="l:student-only controls">
+      <button class="join">Join</button>
+      <button class="leave">Leave</button>
 
-    <div class="l:admin-only admin">
-      <button class="delete">Delete (!!!)</button>
-    </div>            
-  </div>
-
+      <div class="l:admin-only admin">
+        <button class="delete">Delete (!!!)</button>
+      </div>            
+    </div>
+  </section>
+  
   <section class="instructor-panel">
     <h2>You are the instructor</h2>
+    <button class="delete">Delete (!!!)</button>
+
     <div class="form create-lab">
       <h4>Create Lab</h4>
       <label>Lab Name: <input type="text" class="name" /></label>
@@ -30,10 +34,7 @@
 
       <input type="submit" class="submit-button" />
     </div>
-
-
   </section>
-
   
   <ul class="labs">
     <li class="lab">
@@ -44,4 +45,4 @@
       <div>Maximum Team Size: <span class="teamSize">4</span></div>
     </li>
   </ul>
-</section>
+</li>

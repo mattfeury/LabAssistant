@@ -1,10 +1,4 @@
 <section class="lab">
-  <div>Lab Name: <span class="name">Lab 1</span></div>
-  <div>Start Time: <span class="startTime">9:00</span></div>
-  <div>End Time: <span class="endTime">10:00</span></div>
-  <div>Team Assignment: <span class="role">Random</span></div>
-  <div>Max Team Size: <span class="teamSize">4</span></div>
-  
   <section class="instructor-panel">
     <button class="delete">Delete (!!!)</button>
     <button class="generate">Generate Teams</button>
@@ -19,22 +13,34 @@
     </div>
   </section>          
 
-  <ul class="teams">
-    <li class="team">
-      <div>Team Name: <span class="name">Team 1</span></div>
-      <div>Team Number: <span class="number">1</span></div>
-      <div>Number of Students: <span class="size">1</span></div>
-      <ul class="members">
-        <li class="member">Student: <span class="name">Jimmy Jon</span></li>
-      </ul>
-      <div class="l:student-only controls">
-        <button class="join">Join</button>
-        <button class="leave">Leave</button>
+  <section class="info">
+    <div class="name">Lab 1</div>
+    <div>Course Name: <span class="course">Mathematics</span></div>
+    <div>Start Time: <span class="startTime">9:00</span></div>
+    <div>End Time: <span class="endTime">10:00</span></div>
+    <div>Team Assignment: <span class="role">Random</span></div>
+    <div>Max Team Size: <span class="teamSize">4</span></div> 
+  </section>
 
-        <div class="l:admin-only admin">
-          <button class="delete">Delete (!!!)</button>
-        </div>                            
-      </div>
-    </li>
-  </ul>
+  <section class="teams-list">
+    <ul class="teams">
+      <li class="team">
+        <div>Team Name: <span class="name">Team 1</span></div>
+        <div>Team Number: <span class="number">1</span></div>
+        <div>Number of Students: <span class="size">1</span></div>
+        <ul class="members">
+          <li class="member">Student: <span class="name">Jimmy Jon</span></li>
+        </ul>
+        <div class="l:student-only controls">
+          <button class="join">Join</button>
+          <button class="leave">Leave</button>
+
+          <div class="l:admin-only admin">
+            <button class="delete">Delete (!!!)</button>
+          </div>                            
+        </div>
+      </li>
+    </ul>
+  </section>
+
 </section>

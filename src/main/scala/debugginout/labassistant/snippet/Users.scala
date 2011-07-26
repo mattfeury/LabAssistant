@@ -53,10 +53,13 @@ class Users {
 
   def renderUsers = {
     val allUsers = User.findAll(List())
-
     ".user" #> allUsers.map(Renderers.renderUser(_))
   }  
 
+  /**
+   * Render the create user form from the snippet template.
+   * This will validate form input and submit handlers
+   */
   def createUserForm = {
     var username = ""
     var formEmail = ""
@@ -81,7 +84,7 @@ class Users {
       if (shouldLogin)
         UserSessions.logUserIn(Full(user), GoHome).getOrElse(GoHome)
       else
-        ShowMessage("Success.") //should maybe insert student. refresh works for now
+        ShowMessage("Success.") //should maybe insert student.
     }
 
     val selectOpts = List((User.Role.STUDENT, "Student"),(User.Role.INSTRUCTOR, "Instructor"), (User.Role.ADMIN, "Admin"))

@@ -36,60 +36,79 @@ package debugginout.labassistant { package snippet {
     def renderCourse(course:Course, renderAsUser:Option[User] = None) : (NodeSeq)=>NodeSeq = {
       lazy val user = (renderAsUser == None) ? session.is.get.user | renderAsUser.get
 
+      /**
+       * Join the course.
+       */
       def joinCourse = {
         if (user.student_?) {
           Course.update("uniqueId" -> course.uniqueId, "$addToSet" -> ("studentIds" -> user._id))
+          course.labs.map(_.generateTeams)
           val newCourse = course.copy(studentIds = course.studentIds ::: List(user._id))
           ShowMessage("Successfully joined.") &
-          InsertCourse(newCourse.uniqueId, (renderCourse(newCourse, renderAsUser)(Courses.liCourseTemplate)))
+          InsertCourse(newCourse.uniqueId, (renderCourse(newCourse, renderAsUser)(Courses.detailedTemplate)))
         } else {
           ShowError("You are not a student.")
         }
       }
 
+      /**
+       * Leave the course.
+       */
       def leaveCourse = {
         if (user.student_?) {
           Course.update("uniqueId" -> course.uniqueId, "$pull" -> ("studentIds" -> user._id))
+          course.labs.map(_.generateTeams)
 
           val newCourse = course.copy(studentIds = course.studentIds.filterNot(_ == user._id))
         
           ShowMessage("Successfully left.") &
-          InsertCourse(newCourse.uniqueId, (renderCourse(newCourse, renderAsUser)(Courses.liCourseTemplate)))
+          InsertCourse(newCourse.uniqueId, (renderCourse(newCourse, renderAsUser)(Courses.detailedTemplate)))
         } else {
           ShowError("failure")
         }
       }
 
       /**
-       * Delete this current course. Admins only
+       * Delete this current course. Admins or the instructor only
        */
       def deleteCourse(s:String) = {
-        if (user.admin_?) {
+        if (user.admin_? || course.userIsInstructor_?(user)) {
           Course.delete("uniqueId" -> course.uniqueId)
           RemoveCourse(course.uniqueId)
         } else {
-          ShowError("Could not delete.")
+          ShowError("Could not delete. Invalid credentials.")
         }
       }
 
+      // only seen on the detailed course page
+      def renderInstructorPanel = {
+        if (course.userIsInstructor_?(user)) {
+          ".instructor-panel" #> (
+            ".create-lab" #> Labs.createLabForm(course)
+          )
+        } else {
+          ".instructor-panel" #> ClearNodes
+        }
+      }
+
+      renderInstructorPanel andThen
       ".course [class+]" #> (course.studentIds.contains(user._id) ? "joined" | "not-joined") &
       ".course [class+]" #> (course.userIsInstructor_?(user) ? "instructor" | "") &
       ".course [data-id]" #> course.uniqueId &
-      ".name *" #> <a href={pathForCourse(course)} >{course.name}</a> &
-      ".instructor *" #> course.instructor &
-      ".num-labs *" #> course.labs.length &
-      ".num-students *" #> course.students.length &
-      ".controls" #> (
-        ".join" #> ajaxButton(Text("join"), joinCourse _) &
-        ".leave" #> ajaxButton(Text("leave"), leaveCourse _) &
-        ".admin" #> (
-          ".delete [onclick]" #> onEventIf("Really delete?", deleteCourse _)
-        )
-      )
+      ".info" #> (
+        ".name *" #> <a href={pathForCourse(course)} >{course.name}</a> &
+        ".instructor *" #> course.instructor &
+        ".num-labs *" #> course.labs.length &
+        ".num-students *" #> course.students.length
+      ) andThen
+      ".delete [onclick]" #> onEventIf("Really delete?", deleteCourse _) &
+      ".join" #> ajaxButton(Text("join"), joinCourse _) &
+      ".leave" #> ajaxButton(Text("leave"), leaveCourse _)
     }
 	
     def renderLab(lab:Lab, renderAsUser:Option[User] = None) = {
       lazy val user = (renderAsUser == None) ? session.is.get.user | renderAsUser.get
+      lazy val course = lab.course.get
 
       def deleteLab(s:String) = {
         if (lab.course.map(_.userIsInstructor_?(user)) getOrElse false) {
@@ -102,6 +121,7 @@ package debugginout.labassistant { package snippet {
 
       ".lab [data-id]" #> lab.uniqueId &
       ".name *" #> <a href={pathForLab(lab)} >{lab.name}</a> &
+      ".course *" #> <a href={pathForCourse(course)} >{course.name}</a> &
       ".role *" #> lab.role &
       ".teamSize *" #> lab.teamSize &
       ".courseId *" #> lab.courseId &

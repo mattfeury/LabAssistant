@@ -7,26 +7,28 @@
   <body class="lift:content_id=main">
 
     <div id="main" class="lift:surround?with=default;at=content">
-      <div class="l:login-required">
+      <div class="all-courses l:login-required">
 
 
         
         <h2>All Courses</h2>
         <ul class="l:Courses.renderAllCourses">
           <li class="course">
-            <div class="name">CS 2340</div>
+            <section class="info">
+              <div class="name">CS 2340</div>
               <div>Instructor: <span class="instructor">Bob Waters</span></div>
               <div>Number of Labs: <span class="num-labs">10</span></div>
               <div>Number of Students: <span class="num-students">30</span></div>
 
-            <div class="l:student-only controls">
-              <button class="join">Join</button>
-              <button class="leave">Leave</button>
+              <div class="l:student-only controls">
+                <button class="join">Join</button>
+                <button class="leave">Leave</button>
 
-              <div class="l:admin-only admin">
-                <button class="delete">Delete (!!!)</button>
+                <div class="l:admin-only admin">
+                  <button class="delete">Delete (!!!)</button>
+                </div>
               </div>
-            </div>
+            </section>
           </li>
         </ul>
       </div> 

@@ -7,12 +7,12 @@
   <body class="lift:content_id=main">
 
     <div id="main" class="lift:surround?with=default;at=content">
-      <div class="l:login-required">
+      <div class="detailed-course l:login-required">
 
         <h2>Current Course</h2>
-        <section class="l:Courses.renderDetailedCourse?eager_eval=true">
+        <ul class="l:Courses.renderDetailedCourse?eager_eval=true">
           <lift:embed what="templates-hidden/course" />
-        </section>
+        </ul>
       </div> 
     </div>
   </body>

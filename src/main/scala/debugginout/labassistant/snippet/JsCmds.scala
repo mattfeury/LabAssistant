@@ -57,7 +57,7 @@ case class ShowError(error:String) extends JsCmd {
 }
 case class ShowMessage(message:String) extends JsCmd {
   //TODO make this pretty
-  override val toJsCmd = Call("alert", message).toJsCmd
+  override val toJsCmd = Call("showMessage", message).toJsCmd
 }
 case object GoHome extends JsCmd {
   override val toJsCmd = RedirectTo("/home").toJsCmd

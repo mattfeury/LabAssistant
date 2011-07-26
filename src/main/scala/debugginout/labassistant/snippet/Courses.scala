@@ -36,7 +36,7 @@ object Courses {
   }
 
   lazy val detailedTemplate = findXmlInTemplate("templates-hidden/course", ".course")
-  lazy val liCourseTemplate = findXmlInTemplate("courses", ".course")
+  lazy val liCourseTemplate = detailedTemplate
   lazy val liLabTemplate = findXmlInTemplate("templates-hidden/course", ".lab")  
 }
 
@@ -51,8 +51,8 @@ class Courses {
   }
   
   def renderDetailedCourse = {
-    renderInstructorPanel andThen
     ".course" #> renderCourse(course) andThen
+    renderInstructorPanel andThen
 		".lab" #> course.labs.map(renderLab(_))
   }
 

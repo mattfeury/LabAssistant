@@ -55,13 +55,36 @@
   </style>
   <style>
     /* TODO: offload these to their own file */
-    .course > .controls button, .course > .controls a { display: none; }
-    .course > .controls .admin button { display: inline-block; }
-    .course.joined > .controls .leave { display: inline-block; }
-    .course.not-joined > .controls .join { display: inline-block; }
+    .course > .info .controls button, .course > .info .controls a { display: none; }
+    .course > .info .controls .admin button { display: inline-block; }
+    .course.joined > .info .controls .leave { display: inline-block; }
+    .course.not-joined > .info .controls .join { display: inline-block; }
 
-    /* instructor-only view */
-    .home .course > .controls * { display: none !important; }
+    /* instructor-only view. hide advanced controls on home page */
+    .home .course > .info .controls *, .home .course.instructor .instructor-panel, .all-courses .course .instructor-panel { display: none !important; }
+
+    .course .labs { display: none; }
+    .detailed-course .labs { display: block; }
+
+    .lab .teams { display: none; }
+    .detailed-lab .teams { display: block; }
+
+    li { list-style: none; margin-bottom: 1em; }
+    .teams * { list-style: disc; }
+    .course > .info { background: #F5F5DC; border-color: #dddddd; }
+
+    .name { font-size: 1.5em; font-weight: bold; }
+
+    .labs { padding: 0px; overflow: hidden; *zoom: 1}
+    .lab > .info { background: #FAFAD2; }
+    .labs .lab {
+      background: #FAFAD2;
+      padding: 12px;
+      display: inline-block;
+      margin: 12px;
+      float: left;
+    }
+      
   </style>
   </head>
   <body>
@@ -75,6 +98,7 @@
           <a href="/logout">Logout</a>
         </div>
         <div class="lift:Msgs?showAll=true"></div>
+        <div class="messages"></div>
       </nav>
 
       <div id="content">The main content will get bound here</div>

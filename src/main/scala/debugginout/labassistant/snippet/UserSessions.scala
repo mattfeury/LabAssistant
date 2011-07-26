@@ -196,7 +196,7 @@ class UserSessions {
 
           actions match {
             case Full(actions) => actions
-            case Failure(message, _, _) => Alert(message)
+            case Failure(message, _, _) => ShowError(message)
             case Empty => throw new Exception("something vewy vewy bad has happened.")
           }
         // bad login. check to suspend.
@@ -209,12 +209,12 @@ class UserSessions {
                   "You have failed to login " + numFails + " consecutive times.\nYour account has been temporarily suspended."
                 else
                   message + "\nYou have failed to login " + numFails + " consecutive times."              }
-              Alert(response) //ShowLoginError
+              ShowError(response)
             case _ =>
-              Alert(message)
+              ShowError(message)
           }
         case Empty =>
-          Alert("Shouldn't really be empty here... You found the matrix.")
+          ShowError("Shouldn't really be empty here... You found the matrix.")
       }
     }
 
