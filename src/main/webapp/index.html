@@ -5,24 +5,28 @@
     <title>Home</title>
   </head>
   <body class="lift:content_id=main">
-    <div id="main" class="lift:surround?with=default;at=content">
-      <h2>login</h2>
-      <div class="l:UserSessions.loginForm">
-        <input type="text" class="username" />
-        <input type="password" class="password" />
-        <input type="submit" class="submit-button" />        
-      </div>
+    <div id="main" class="splash lift:surround?with=default;at=content">
+      <section class="login">
+        <h2>login</h2>
+        <div class="l:UserSessions.loginForm">
+          <label>Username: <input type="text" class="username" /></label>
+          <label>Password: <input type="password" class="password" /></label>
+          <input type="submit" class="submit-button" />
+        </div>
+      </section>
 
-      <h2>Signup</h2>
-      <div class="l:Users.createUserForm?login=true">
-        <label>Username: <input type="text" class="username" /></label>
-        <label>Password: <input type="password" class="password" /></label>
+      <section class="signup">
+        <h2>Signup</h2>
+        <div class="l:Users.createUserForm?login=true">
+          <label>Username: <input type="text" class="username" /></label>
+          <label>Password: <input type="password" class="password" /></label>
 
-        <label>Email: <input type="email" class="email" /></label>
-        <label>Name: <input type="text" class="name" /></label>
+          <label>Email: <input type="email" class="email" /></label>
+          <label>Name: <input type="text" class="name" /></label>
 
-        <input type="submit" class="submit-button" />
-      </div>
+          <input type="submit" class="submit-button" />
+        </div>
+      </section>
     </div>
   </body>
 </html>
