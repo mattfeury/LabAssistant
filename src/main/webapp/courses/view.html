@@ -10,11 +10,20 @@
       <div class="l:login-required">
 
         <h2>Current Course</h2>
-        <section class="course l:Courses.renderCourse">
+        <section class="course l:Courses.renderDetailedCourse">
           <div>Course Name: <span class="name">CS 2340</span></div>
           <div>Instructor: <span class="instructor">Bob Waters</span></div>
           <div>Number of Labs: <span class="num-labs">10</span></div>
           <div>Number of Students: <span class="num-students">30</span></div>
+
+          <div class="l:student-only controls">
+            <button class="join">Join</button>
+            <button class="leave">Leave</button>
+
+            <div class="l:admin-only admin">
+              <button class="delete">Delete (!!!)</button>
+            </div>            
+          </div>
 
           <ul class="labs">
             <li class="lab">
@@ -25,12 +34,6 @@
 			        <div>Maximum Team Size: <span class="teamSize">4</span></div>
             </li>
           </ul>
-          
-          <div class="l:student-only controls">
-            <button class="join">Join</button>
-            <button class="leave">Leave</button>
-          </div>
-
         </section>
         <section class="l:Courses.renderInstructorPanel">
           <h2>You are the instructor</h2>
@@ -39,7 +42,7 @@
             <label>Lab Name: <input type="text" class="name" /></label>
             <label>Team Size: <input type="text" class="teamSize" /></label>
             <label>Role 
-              <select class="role" />
+              <select class="role">
                 <option>Self-Select</option>
               </select>
             </label>

@@ -23,6 +23,8 @@ import Helpers._
 
 import debugginout.labassistant.model._
 import debugginout.labassistant.snippet._
+  import Renderers._
+  import TemplateHelpers._
 
 object currentCourse extends RequestVar[Box[Course]](Empty)
 
@@ -39,16 +41,17 @@ class Courses {
   lazy val course = currentCourse.is.open_!
   lazy val user = session.is.get.user
 
+  lazy val template = findXmlInTemplate("courses", ".course")
+
   def renderAllCourses = {
     val allCourses = Course.findAll(List())
 
-    ".course" #> allCourses.map(Renderers.renderCourse(_))
+    ".course" #> allCourses.map(renderCourse(_))
   }
   
-  def renderCourse = {
-    printGreen(course.labs)
-    ".course" #> Renderers.renderCourse(course) andThen
-		".lab" #> course.labs.map(Renderers.renderLab(_))
+  def renderDetailedCourse = {
+    ".course" #> renderCourse(course) andThen
+		".lab" #> course.labs.map(renderLab(_))
   }
 
   def renderInstructorPanel = {
@@ -71,10 +74,10 @@ class Courses {
           val course = Course(name, user._id)
           course.save
 
-          Alert("created")
+          InsertCourse(course.uniqueId, (Renderers.renderCourse(course, Full(user))(template)))
         }
       } openOr
-        Alert("failure")
+        ShowError("There was an error.")
     }
 
     val processContents =

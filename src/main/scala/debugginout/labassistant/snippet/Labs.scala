@@ -23,6 +23,8 @@ import Helpers._
 
 import debugginout.labassistant.model._
 import debugginout.labassistant.snippet._
+  import Renderers._
+  import TemplateHelpers._
 
 object currentLab extends RequestVar[Box[Lab]](Empty)
 
@@ -34,6 +36,8 @@ object Labs {
 	}
 
 	def createLabForm(course:Course) = {
+    lazy val template = findXmlInTemplate("courses", ".course")
+    
 		var name = ""
 		var startTime = ""
 		var endTime = ""
@@ -48,32 +52,34 @@ object Labs {
 					user = session.user if user.instructor_? && course.userIsInstructor_?(user)
 				} yield {
 		
-				val lab = 
-					Lab(name = name,
-						startTime = startTime, 
-						endTime = endTime, 
-						courseId = courseId,
-						teamSize = Integer.parseInt(teamSize), 
-						role = role)
-				lab.save
+          val lab = 
+            Lab(name = name,
+              startTime = startTime, 
+              endTime = endTime, 
+              courseId = courseId,
+              teamSize = Integer.parseInt(teamSize), 
+              role = role)
+          lab.save
 
-        var message = "Generated."
+          val message:Box[String] = lab.role match {
+            case Lab.Role.INDIVIDUAL =>
+              lab.generateIndividualTeams
+              Empty
+            case Lab.Role.RANDOM =>
+              val leftovers = lab.generateRandomTeams
+              if (leftovers > 0)
+                Full(" Warning: "+leftovers+" students could not be placed on a team. try a different size.")
+              else
+                Empty
+            case _ =>
+              Empty
+          }
 
-        lab.role match {
-          case Lab.Role.INDIVIDUAL =>
-            lab.generateIndividualTeams
-          case Lab.Role.RANDOM =>
-            val leftovers = lab.generateRandomTeams
-            if (leftovers > 0)
-              message += " Warning: "+leftovers+" students could not be placed on a team. try a different size."
-          case _ =>
-        }
-
-        Alert(message)
-
+          val actions = InsertLab(lab.uniqueId, renderLab(lab)(template))
+          message.map(actions & ShowMessage(_)) openOr actions
 				}
 			} openOr
-			Alert("failure")
+			  Alert("failure")
 		}
 		
 		val selectOpts = List((Lab.Role.RANDOM, "Random"),(Lab.Role.INDIVIDUAL, "Individual"), (Lab.Role.SELFSELECT, "Self Select"))
@@ -103,8 +109,7 @@ class Labs {
 		".lab" #> allLabs.map(Renderers.renderLab(_))
 	}
 	
-	def renderLab = {
-
+	def renderDetailedLab = {
     def renderCreateTeam = {
       var name = ""
 

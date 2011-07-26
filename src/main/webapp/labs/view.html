@@ -10,13 +10,26 @@
       <div class="l:login-required">
 
         <h2>Current Lab</h2>
-        <section class="lab l:Labs.renderLab">
+        <section class="lab l:Labs.renderDetailedLab">
           <div>Lab Name: <span class="name">Lab 1</span></div>
           <div>Start Time: <span class="startTime">9:00</span></div>
           <div>End Time: <span class="endTime">10:00</span></div>
           <div>Team Assignment: <span class="role">Random</span></div>
           <div>Max Team Size: <span class="teamSize">4</span></div>
-          <br />
+
+          <section class="instructor-panel">
+            <button class="generate">Generate Teams</button>
+          </section>
+          
+          <section class="student-panel">
+            <h2>You are a student</h2>
+            <div class="form">
+              <h4>Create Team</h4>
+              <label>Team Name: <input type="text" class="name" /></label>
+              <input type="submit" class="submit-button" />
+            </div>
+          </section>          
+
           <ul class="teams">
       			<li class="team">
               <div>Team Name: <span class="name">Team 1</span></div>
@@ -25,27 +38,12 @@
               <ul class="members">
                 <li class="member">Student: <span class="name">Jimmy Jon</span></li>
               </ul>
-              <span class="l:student-only controls">
+              <div class="l:student-only controls">
                 <button class="join">Join</button>
                 <button class="leave">Leave</button>
-              </span>
-              <br />    
+              </div>
     	  		</li>
           </ul>
-          <section class="student-panel">
-            <h2>You are a student</h2>
-            <div class="form">
-              <h4>Create Team</h4>
-              <label>Team Name: <input type="text" class="name" /></label>
-              <input type="submit" class="submit-button" />
-            </div>
-
-
-          </section>
-          <section class="instructor-panel">
-            <button class="generate">Generate Teams</button>
-          </section>
-
           
         </section>
 

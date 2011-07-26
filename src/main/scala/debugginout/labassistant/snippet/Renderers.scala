@@ -8,20 +8,21 @@ package debugginout.labassistant { package snippet {
       import Extraction.decompose
       import JsonDSL._
 
-    import http._
+    import http._ 
       import js._
         import JsCmds._    
         import JE._
       import provider._
       import LiftRules._        
       import SHtml._
+      import Helpers._
 
   import java.util.Date
   import debugginout.labassistant.lib._
-  import Helpers._
 
   import debugginout.labassistant.model._
-
+  import LinkHelpers._
+  
   /*
    * General renders for most of our models
    */
@@ -32,7 +33,7 @@ package debugginout.labassistant { package snippet {
       ".role *" #> user.role
     }
     
-    def renderCourse(course:Course, renderAsUser:Option[User] = None) = {
+    def renderCourse(course:Course, renderAsUser:Option[User] = None) : (NodeSeq)=>NodeSeq = {
       lazy val user = (renderAsUser == None) ? session.is.get.user | renderAsUser.get
 
       def joinCourse = {
@@ -53,14 +54,32 @@ package debugginout.labassistant { package snippet {
         }
       }
 
+      /**
+       * Delete this current course. Admins only
+       */
+      def deleteCourse = {
+        if (user.admin_?) {
+          Course.delete("uniqueId" -> course.uniqueId)
+          RemoveCourse(course.uniqueId)
+        } else {
+          ShowError("Could not delete.")
+        }
+      }
+
       ".course [class+]" #> (course.studentIds.contains(user._id) ? "joined" | "not-joined") &
       ".course [class+]" #> (course.userIsInstructor_?(user) ? "instructor" | "") &
-      ".name *" #> <a href={"/courses/"+course.uniqueId} >{course.name}</a> &
+      ".course [data-id]" #> course.uniqueId &
+      ".name *" #> <a href={pathForCourse(course)} >{course.name}</a> &
       ".instructor *" #> course.instructor &
       ".num-labs *" #> course.labs.length &
       ".num-students *" #> course.students.length &
-      ".join" #> ajaxButton(Text("join"), joinCourse _) &
-      ".leave" #> ajaxButton(Text("leave"), leaveCourse _)
+      ".controls" #> (
+        ".join" #> ajaxButton(Text("join"), joinCourse _) &
+        ".leave" #> ajaxButton(Text("leave"), leaveCourse _) &
+        ".admin" #> (
+          ".delete" #> ajaxButton(Text("delete"), deleteCourse _)
+        )
+      )
     }
 	
     def renderLab(lab:Lab) = {
@@ -103,4 +122,5 @@ package debugginout.labassistant { package snippet {
       ".leave" #> ajaxButton(Text("leave"), leaveTeam _)
     }
   }
+
 } }

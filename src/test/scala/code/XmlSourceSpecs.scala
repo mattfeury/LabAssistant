@@ -13,6 +13,19 @@ import net.liftweb.util.PCDataXmlParser
 class XmlSourceSpecsTest extends JUnit4(XmlSourceSpecs)
 
 object XmlSourceSpecs extends Specification {
+	
+  "hemna" should {
+  	"be empty" in {
+  	  List() must beEmpty
+  	}
+  	"be falst" in {
+	  false must beFalse
+  	}	
+  }
+
+  "Generate individual teams" should {
+    
+  }
 
   "XML Sources" should {
     "be well-formed" in {

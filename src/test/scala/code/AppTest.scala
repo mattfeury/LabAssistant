@@ -1,5 +1,6 @@
 package code
 
+import debugginout.labassistant._
 import java.io.File
 import junit.framework._
 import Assert._
@@ -27,7 +28,7 @@ class AppTest extends TestCase("app") {
    * Rigourous Tests :-)
    */
   def testOK() = assertTrue(true)
-  // def testKO() = assertTrue(false);
+  def testKO() = assertTrue(false);
 
   /**
    * Tests to make sure the project's XML files are well-formed.
