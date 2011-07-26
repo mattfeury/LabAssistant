@@ -1,0 +1,47 @@
+<section class="course">
+  <div>Course Name: <span class="name">CS 2340</span></div>
+  <div>Instructor: <span class="instructor">Bob Waters</span></div>
+  <div>Number of Labs: <span class="num-labs">10</span></div>
+  <div>Number of Students: <span class="num-students">30</span></div>
+
+  <div class="l:student-only controls">
+    <button class="join">Join</button>
+    <button class="leave">Leave</button>
+
+    <div class="l:admin-only admin">
+      <button class="delete">Delete (!!!)</button>
+    </div>            
+  </div>
+
+  <section class="instructor-panel">
+    <h2>You are the instructor</h2>
+    <div class="form create-lab">
+      <h4>Create Lab</h4>
+      <label>Lab Name: <input type="text" class="name" /></label>
+      <label>Team Size: <input type="text" class="teamSize" /></label>
+      <label>Role 
+        <select class="role">
+          <option>Self-Select</option>
+        </select>
+      </label>
+
+      <label>Start Time: <input type="text" class="startTime" /></label>
+      <label>End Time: <input type="text" class="endTime" /></label>
+
+      <input type="submit" class="submit-button" />
+    </div>
+
+
+  </section>
+
+  
+  <ul class="labs">
+    <li class="lab">
+      <div>Lab Title: <span class="name">Lab 1</span></div>
+      <div>Start Time: <span class="startTime">9:00</span></div>
+      <div>End Time: <span class="endTime">10:00</span></div>
+      <div>Team Assignment: <span class="role">Random</span></div>
+      <div>Maximum Team Size: <span class="teamSize">4</span></div>
+    </li>
+  </ul>
+</section>

@@ -35,9 +35,12 @@ object Labs {
 			RewriteResponse("labs" :: "view" :: Nil, true) 
 	}
 
-	def createLabForm(course:Course) = {
-    lazy val template = findXmlInTemplate("courses", ".course")
-    
+  lazy val template = findXmlInTemplate("templates-hidden/lab", ".lab")
+  lazy val teamTemplate = findXmlInTemplate("templates-hidden/lab", ".team")
+  lazy val liLabTemplate = findXmlInTemplate("templates-hidden/course", ".lab") //use this template rather than the detailed one for now
+
+  //used via the instructor panel on course detail pages
+	def createLabForm(course:Course) = {  
 		var name = ""
 		var startTime = ""
 		var endTime = ""
@@ -61,25 +64,14 @@ object Labs {
               role = role)
           lab.save
 
-          val message:Box[String] = lab.role match {
-            case Lab.Role.INDIVIDUAL =>
-              lab.generateIndividualTeams
-              Empty
-            case Lab.Role.RANDOM =>
-              val leftovers = lab.generateRandomTeams
-              if (leftovers > 0)
-                Full(" Warning: "+leftovers+" students could not be placed on a team. try a different size.")
-              else
-                Empty
-            case _ =>
-              Empty
-          }
+          //generate teams if necessary
+          val message = lab.generateTeams
 
-          val actions = InsertLab(lab.uniqueId, renderLab(lab)(template))
+          val actions = InsertLab(lab.uniqueId, renderLab(lab)(liLabTemplate))
           message.map(actions & ShowMessage(_)) openOr actions
 				}
 			} openOr
-			  Alert("failure")
+			  ShowError("Error creating lab.")
 		}
 		
 		val selectOpts = List((Lab.Role.RANDOM, "Random"),(Lab.Role.INDIVIDUAL, "Individual"), (Lab.Role.SELFSELECT, "Self Select"))
@@ -110,6 +102,7 @@ class Labs {
 	}
 	
 	def renderDetailedLab = {
+
     def renderCreateTeam = {
       var name = ""
 
@@ -138,22 +131,21 @@ class Labs {
     }
 
     def generateTeams = {
-      var message = "Generated."
+      //generate teams if necessary
+      val oldTeams = lab.teams
 
-      lab.role match {
-        case Lab.Role.INDIVIDUAL =>
-          lab.generateIndividualTeams
-        case Lab.Role.RANDOM =>
-          val leftovers = lab.generateRandomTeams
-    			if (leftovers > 0)
-            message += " Warning: "+leftovers+" students could not be placed on a team. try a different size."
+      lab.generateTeams match {
+        case Full(string) =>
+          oldTeams.map((team:Team) => RemoveTeam(team.uniqueId)) &
+          lab.teams.map((team:Team) => InsertTeam(team.uniqueId, renderTeam(team)(Labs.teamTemplate)))
+        case Failure(string, _, _) =>
+          ShowError(string)
         case _ =>
+          ShowError("You broke something... High five.")
       }
-
-      Alert(message)
     }
 
-		".lab" #> Renderers.renderLab(lab) andThen
+		".lab" #> renderLab(lab) andThen
     ".teams" #> (
   		".team" #> lab.teams.map(Renderers.renderTeam(_))
     ) &

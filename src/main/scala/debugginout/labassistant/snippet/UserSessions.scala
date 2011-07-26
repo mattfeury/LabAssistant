@@ -192,7 +192,7 @@ class UserSessions {
         case Full(user) =>
           val actions =
             UserSessions.logUserIn(Full(user),
-                                   RedirectTo("/home"))
+                                   GoHome)
 
           actions match {
             case Full(actions) => actions

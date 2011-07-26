@@ -35,13 +35,14 @@ object Courses {
       RewriteResponse("courses" :: "view" :: Nil, true)
   }
 
+  lazy val detailedTemplate = findXmlInTemplate("templates-hidden/course", ".course")
+  lazy val liCourseTemplate = findXmlInTemplate("courses", ".course")
+  lazy val liLabTemplate = findXmlInTemplate("templates-hidden/course", ".lab")  
 }
 
 class Courses {
   lazy val course = currentCourse.is.open_!
   lazy val user = session.is.get.user
-
-  lazy val template = findXmlInTemplate("courses", ".course")
 
   def renderAllCourses = {
     val allCourses = Course.findAll(List())
@@ -50,18 +51,23 @@ class Courses {
   }
   
   def renderDetailedCourse = {
+    renderInstructorPanel andThen
     ".course" #> renderCourse(course) andThen
 		".lab" #> course.labs.map(renderLab(_))
   }
 
+  // only seen on the detailed course page
   def renderInstructorPanel = {
     if (course.userIsInstructor_?(user)) {
-      Labs.createLabForm(course)
+      ".instructor-panel" #> (
+        ".create-form" #> Labs.createLabForm(course)
+      )
     } else {
-      ClearNodes
+      ".instructor-panel" #> ClearNodes
     }
   }
 
+  //called from the home page for instructors
   def createCourseForm = {
     var name = ""
 
@@ -74,7 +80,7 @@ class Courses {
           val course = Course(name, user._id)
           course.save
 
-          InsertCourse(course.uniqueId, (Renderers.renderCourse(course, Full(user))(template)))
+          InsertCourse(course.uniqueId, (Renderers.renderCourse(course, Full(user))(Courses.liCourseTemplate)))
         }
       } openOr
         ShowError("There was an error.")

@@ -59,6 +59,12 @@ case class ShowMessage(message:String) extends JsCmd {
   //TODO make this pretty
   override val toJsCmd = Call("alert", message).toJsCmd
 }
+case object GoHome extends JsCmd {
+  override val toJsCmd = RedirectTo("/home").toJsCmd
+}
+case object Refresh extends JsCmd {
+  override val toJsCmd = Call("location.reload(true)").toJsCmd
+}
 
 /**
  * Easy classes for inserting and deleting data based on any model

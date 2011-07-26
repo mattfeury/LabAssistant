@@ -131,6 +131,30 @@ case class Lab(name:String, startTime:String, endTime:String,
     Team.delete("labId" -> uniqueId)
   }
 
+  /**
+   * Calls the necessary generation function if we should do that sorta thing
+   *
+   * It returns a Box[String] with an optional notice:
+   * Full if successful,
+   * Failure if successful, but not all students could be assigned
+   * or Empty: you can't generate teams for this type of lab
+   */ 
+  def generateTeams : Box[String] = {
+    role match {
+      case Lab.Role.INDIVIDUAL =>
+        generateIndividualTeams
+        Full("Successful.")
+      case Lab.Role.RANDOM =>
+        val leftovers = generateRandomTeams
+        if (leftovers > 0)
+          Failure("Warning: " + leftovers + " students could not be placed on a team. try a different size.")
+        else
+          Full("Successful.")
+      case _ =>
+        Empty
+    }
+  }
+
   def generateIndividualTeams = {
     if (role == Lab.Role.INDIVIDUAL)
     {

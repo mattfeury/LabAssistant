@@ -64,6 +64,7 @@ class Users {
     var name = ""
     var role = User.Role.STUDENT
     val preferredRole = S.attr("role")
+    val shouldLogin = S.attr("login").isDefined
 
     def validateSignup = {
       val properRole = preferredRole getOrElse role
@@ -77,7 +78,10 @@ class Users {
 
       user.save
 
-      Alert("you win")
+      if (shouldLogin)
+        UserSessions.logUserIn(Full(user), GoHome).getOrElse(GoHome)
+      else
+        ShowMessage("Success.") //should maybe insert student. refresh works for now
     }
 
     val selectOpts = List((User.Role.STUDENT, "Student"),(User.Role.INSTRUCTOR, "Instructor"), (User.Role.ADMIN, "Admin"))

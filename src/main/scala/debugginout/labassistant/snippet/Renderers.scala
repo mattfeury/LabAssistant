@@ -39,25 +39,31 @@ package debugginout.labassistant { package snippet {
       def joinCourse = {
         if (user.student_?) {
           Course.update("uniqueId" -> course.uniqueId, "$addToSet" -> ("studentIds" -> user._id))
-          Alert("course joined")
+          val newCourse = course.copy(studentIds = course.studentIds ::: List(user._id))
+          ShowMessage("Successfully joined.") &
+          InsertCourse(newCourse.uniqueId, (renderCourse(newCourse, renderAsUser)(Courses.liCourseTemplate)))
         } else {
-          Alert("You are not a student.")
+          ShowError("You are not a student.")
         }
       }
 
       def leaveCourse = {
         if (user.student_?) {
           Course.update("uniqueId" -> course.uniqueId, "$pull" -> ("studentIds" -> user._id))
-          Alert("course left")
+
+          val newCourse = course.copy(studentIds = course.studentIds.filterNot(_ == user._id))
+        
+          ShowMessage("Successfully left.") &
+          InsertCourse(newCourse.uniqueId, (renderCourse(newCourse, renderAsUser)(Courses.liCourseTemplate)))
         } else {
-          Alert("failure")
+          ShowError("failure")
         }
       }
 
       /**
        * Delete this current course. Admins only
        */
-      def deleteCourse = {
+      def deleteCourse(s:String) = {
         if (user.admin_?) {
           Course.delete("uniqueId" -> course.uniqueId)
           RemoveCourse(course.uniqueId)
@@ -77,18 +83,31 @@ package debugginout.labassistant { package snippet {
         ".join" #> ajaxButton(Text("join"), joinCourse _) &
         ".leave" #> ajaxButton(Text("leave"), leaveCourse _) &
         ".admin" #> (
-          ".delete" #> ajaxButton(Text("delete"), deleteCourse _)
+          ".delete [onclick]" #> onEventIf("Really delete?", deleteCourse _)
         )
       )
     }
 	
-    def renderLab(lab:Lab) = {
-      ".name *" #> <a href={"/labs/"+lab.uniqueId} >{lab.name}</a> &
+    def renderLab(lab:Lab, renderAsUser:Option[User] = None) = {
+      lazy val user = (renderAsUser == None) ? session.is.get.user | renderAsUser.get
+
+      def deleteLab(s:String) = {
+        if (lab.course.map(_.userIsInstructor_?(user)) getOrElse false) {
+          Lab.delete("uniqueId" -> lab.uniqueId)
+          RemoveLab(lab.uniqueId)
+        } else {
+          ShowError("Could not delete.")
+        }        
+      }
+
+      ".lab [data-id]" #> lab.uniqueId &
+      ".name *" #> <a href={pathForLab(lab)} >{lab.name}</a> &
       ".role *" #> lab.role &
       ".teamSize *" #> lab.teamSize &
       ".courseId *" #> lab.courseId &
       ".startTime *" #> lab.startTime &
-      ".endTime *" #> lab.endTime
+      ".endTime *" #> lab.endTime &
+      ".delete [onclick]" #> onEventIf("Really delete?", deleteLab _)      
     }
 	
     def renderTeam(team:Team) = {
@@ -113,6 +132,7 @@ package debugginout.labassistant { package snippet {
         }
       }
 
+      ".team [data-id]" #> team.uniqueId &
       ".name *" #> team.name &
       ".size *" #> team.size &
       ".member *" #> team.students.map(renderUser(_)) &
