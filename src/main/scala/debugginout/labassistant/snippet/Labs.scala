@@ -29,7 +29,7 @@ object currentLab extends RequestVar[Box[Lab]](Empty)
 object Labs {
 	def rewriteRules : RewritePF = {
 		case RewriteRequest(ParsePath("labs" :: labId :: Nil, _, _, _), _, _) =>
-			currentLab(Lab.find("uniqueId" -> labId))
+			//currentLab(Lab.find("uniqueId" -> labId))
 			RewriteResponse("labs" :: "view" :: Nil, true) 
 	}
 
@@ -52,10 +52,10 @@ object Labs {
 					Lab(name = name,
 						startTime = startTime, 
 						endTime = endTime, 
-						courseId = courseId,
+						course = Some(course),
 						teamSize = Integer.parseInt(teamSize), 
 						role = role)
-				lab.save
+				//lab.save
 
         var message = "Generated."
 
@@ -99,11 +99,11 @@ class Labs {
 	lazy val user = session.is.get.user
 	
 	def renderLabs = {
-		val allLabs = Lab.findAll(List())
+		val allLabs = List()//Lab.findAll(List())
 		".lab" #> allLabs.map(Renderers.renderLab(_))
 	}
 	
-	def renderLab = {
+	def renderLab(lab : Lab) = {
 
     def renderCreateTeam = {
       var name = ""
@@ -112,9 +112,9 @@ class Labs {
         if (lab.studentIsOnTeam_?(user))
           Alert("student already on team")
         else {
-          var team = Team(name, 0, lab.uniqueId, List(user._id))
-          team.save
-          team = team.teamWithNumber.get
+          var team = Team(name, 0, Some(lab), List(user._id))
+          //team.save
+          team.teamWithNumber
 
           Alert("booyah")
         }

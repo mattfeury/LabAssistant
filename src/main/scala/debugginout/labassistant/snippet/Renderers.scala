@@ -67,7 +67,7 @@ package debugginout.labassistant { package snippet {
       ".name *" #> <a href={"/labs/"+lab.uniqueId} >{lab.name}</a> &
       ".role *" #> lab.role &
       ".teamSize *" #> lab.teamSize &
-      ".courseId *" #> lab.courseId &
+      ".courseId *" #> lab.course.map(_.uniqueId).get &
       ".startTime *" #> lab.startTime &
       ".endTime *" #> lab.endTime
     }
@@ -78,7 +78,8 @@ package debugginout.labassistant { package snippet {
 
       def joinTeam = {
         if (lab.studentIsInCourseFor_?(user) && ! lab.studentIsOnTeam_?(user) && ! team.isFull_?) {
-          Team.update("uniqueId" -> team.uniqueId, "$addToSet" -> ("studentIds" -> user._id))
+          team.studentIds = team.studentIds ::: List(user._id)
+          //Team.update("uniqueId" -> team.uniqueId, "$addToSet" -> ("studentIds" -> user._id))
           Alert("team joined")
         } else {
           Alert("Cannot join.")
@@ -87,7 +88,8 @@ package debugginout.labassistant { package snippet {
 
       def leaveTeam = {
         if (lab.studentIsOnTeam_?(user)) {
-          Team.update("uniqueId" -> team.uniqueId, "$pull" -> ("studentIds" -> user._id))
+          team.studentIds = team.studentIds.filterNot(_ != user._id)
+          //Team.update("uniqueId" -> team.uniqueId, "$pull" -> ("studentIds" -> user._id))
           Alert("team left")
         } else {
           Alert("cannot leave")

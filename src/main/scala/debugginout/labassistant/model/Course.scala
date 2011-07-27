@@ -17,26 +17,23 @@ import net.liftweb._
 import org.bson.types.ObjectId
 import lib._
 
-import net.liftweb.mapper._
-import net.liftweb.util._
-import net.liftweb.common._
-
-
 /*
  * Courses
  */
 case class Course(name:String, instructor:String, 
-                  studentIds:List[String] = List(),
+                  var studentIds:List[String] = List(),
+                  var labs:List[Lab] = List(),
                   createdAt:Date = now, _id:ObjectId = ObjectId.get,
-                  uniqueId:String = randomString(32)) extends MegaProtoUser[Course] {
+                  uniqueId:String = randomString(32)) extends MongoDocument[Course] {
   def meta = Course
   
   def students = {
     User.findAll(("_id" -> ("$in" -> studentIds)))
   }
 
-  def labs = {
-    Lab.findAll("courseId" -> uniqueId)
+  def insertLab(lab:Lab) = {
+    lab.course = Some(this)
+    labs = labs ::: List(lab)
   }
 
   def userIsInstructor_?(user:User) : Boolean = userIsInstructor_?(user._id)
@@ -47,7 +44,7 @@ case class Course(name:String, instructor:String,
   
 }
 
-object Course extends MetaMegaProtoUser[Course] {
+object Course extends MongoDocumentMeta[Course] {
   override def formats = allFormats
 
 }
@@ -55,15 +52,12 @@ object Course extends MetaMegaProtoUser[Course] {
 /*
  * Teams
  */
-case class Team(name:String, number:Int,
-                labId:String,
-                studentIds:List[String] = List(),
+case class Team(name:String, var number:Int,
+                lab:Option[Lab],
+                var studentIds:List[String] = List(),
                 _id:ObjectId = ObjectId.get,
-                uniqueId:String = randomString(32)) extends MegaProtoUser[Team] {
-  def meta = Team
-  
+                uniqueId:String = randomString(32)) {
   def students = User.findAll("_id" -> ("$in" -> studentIds))
-  def lab = Lab.find("uniqueId" -> labId)
   def size = studentIds.length
 
   def isFull_? = {
@@ -89,15 +83,10 @@ case class Team(name:String, number:Int,
       teams = lab.teams
     } yield {
       val id = teams.length
-      meta.update("uniqueId" -> uniqueId, "$set" -> ("number" -> id))
-      this.copy(number = id)
+      number = id
     }
   }
 
-}
-
-object Team extends MetaMegaProtoUser[Team] {
-  override def formats = allFormats
 }
 
 
@@ -105,14 +94,11 @@ object Team extends MetaMegaProtoUser[Team] {
  * Labs
  */
 case class Lab(name:String, startTime:String, endTime:String, 
-               teamSize:Int, courseId:String,
+               teamSize:Int, var course:Option[Course],
                role:String = Lab.Role.RANDOM,
                _id:ObjectId = ObjectId.get,
-               uniqueId:String = randomString(32)) extends MegaProtoUser[Lab] {
-  def meta = Lab
-  
-  def course = Course.find("uniqueId" -> courseId)
-  def teams = Team.findAll("labId" -> uniqueId)
+               var teams:List[Team] = List(),
+               uniqueId:String = randomString(32)) {
 
   def isSelfSelect_? = role == Lab.Role.SELFSELECT
 
@@ -133,7 +119,8 @@ case class Lab(name:String, startTime:String, endTime:String,
 
   def deleteExistingTeams = {
     //delete existing teams
-    Team.delete("labId" -> uniqueId)
+    teams = List()
+    //Team.delete("labId" -> uniqueId)
   }
 
   def generateIndividualTeams = {
@@ -149,9 +136,9 @@ case class Lab(name:String, startTime:String, endTime:String,
       } {
         val team = Team(name = student,
                         number = i,
-                        labId = uniqueId,
+                        lab = Some(this),
                         studentIds = List(student))
-        team.save
+        teams = teams ::: List(team)
         i = i + 1
       }
     }
@@ -170,26 +157,25 @@ case class Lab(name:String, startTime:String, endTime:String,
         val numberOfExtraStudents = numberOfStudents % teamSize
         var shuffledStudents = scala.util.Random.shuffle(students)
         var teamNumber = 0
-        var createdTeamIds:List[String] = List()
+        var createdTeams:List[Team] = List()
         
         while (shuffledStudents.length >= teamSize) {
           teamNumber = teamNumber + 1
           val teamStudentIds = shuffledStudents.take(teamSize)
           shuffledStudents = shuffledStudents.drop(teamSize)
           
-          val team = Team(teamNumber.toString, teamNumber, uniqueId, teamStudentIds)
-          team.save
-          createdTeamIds = createdTeamIds ::: List(team.uniqueId)
+          val team = Team(teamNumber.toString, teamNumber, Some(this), teamStudentIds)
+          createdTeams = createdTeams ::: List(team)
 
         }
 
         for {
-          createdTeamId <- createdTeamIds if shuffledStudents.length > 0
+          createdTeam <- createdTeams if shuffledStudents.length > 0
         } {
           val studentId = shuffledStudents.head
           shuffledStudents = shuffledStudents.drop(1)
 
-          Team.update("uniqueId" -> createdTeamId, ("$addToSet" -> ("studentIds" -> studentId)))
+          createdTeam.studentIds = createdTeam.studentIds ::: List(studentId)
         }
 
         shuffledStudents.length
@@ -201,8 +187,7 @@ case class Lab(name:String, startTime:String, endTime:String,
 
 }
 
-object Lab extends MetaMegaProtoUser[Lab] {
-  override def formats = allFormats
+object Lab {
 
   object Role {
     val INDIVIDUAL = "individual"
